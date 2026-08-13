@@ -344,12 +344,12 @@ v8.10    PR#2328   76    折返↩            ✓
   <p>每次提交都过"证据核验 → 折返点复核 → K 标放行/折返"，账本不可变、Trace 可回放。<span class="tag green">真实任务闭环</span><span class="tag green">结果校验</span><span class="tag green">安全熔断审计</span></p>
 
   <h3>8.2 命令行全流程（评审可直接运行）</h3>
-  <pre>$ switchback init
-$ switchback register jz-001 --title "京张方案 v8.1" --grade steep
-$ switchback verify  jz-001 --claims claims.json --sources sources.json
-$ switchback approve jz-001 --label release
-$ switchback status  jz-001
-$ switchback ledger    <span class="dim"># 输出 K 标哈希链并校验完整性</span></pre>
+  <pre>$ python -m switchback.cli init
+$ python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
+$ python -m switchback.cli verify  jz-001 --claims claims.json --sources sources.json
+$ python -m switchback.cli approve jz-001 --label release
+$ python -m switchback.cli status  jz-001
+$ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链并校验完整性</span></pre>
 
   <h3>8.3 测试证据</h3>
   <ul>

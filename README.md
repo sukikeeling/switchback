@@ -77,13 +77,13 @@ pip install -e ".[dev]"
 # 一键复现京张 84 分真实案例（输出转写 + K标账本 + 可观测 trace）
 python -m switchback.cli replay jingzhang
 
-# 或从命令行驱动整条治理管线
-switchback init
-switchback register jz-001 --title "京张方案 v8.1" --grade steep
-switchback verify  jz-001 --claims tests/fixtures/claims.json --sources tests/fixtures/sources.json
-switchback approve jz-001 --label release
-switchback status  jz-001
-switchback ledger
+# 或从命令行驱动整条治理管线（同义命令 `switchback …` 已注册 console script）
+python -m switchback.cli init
+python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
+python -m switchback.cli verify  jz-001 --claims tests/fixtures/claims.json --sources tests/fixtures/sources.json
+python -m switchback.cli approve jz-001 --label release
+python -m switchback.cli status  jz-001
+python -m switchback.cli ledger
 ```
 
 运行测试：
