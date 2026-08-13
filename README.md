@@ -77,6 +77,9 @@ pip install -e ".[dev]"
 # 一键复现京张 84 分真实案例（输出转写 + K标账本 + 可观测 trace）
 python -m switchback.cli replay jingzhang
 
+# 一键复现运维事故自主闭环（跨行业第二案例）
+python -m switchback.cli replay ops
+
 # 或从命令行驱动整条治理管线（同义命令 `switchback …` 已注册 console script）
 python -m switchback.cli init
 python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
@@ -89,7 +92,7 @@ python -m switchback.cli ledger
 运行测试：
 
 ```bash
-python -m pytest            # 23 项测试全绿：协议/治理/账本/技能/案例
+python -m pytest            # 38 项测试全绿：协议/治理/账本/技能/案例/状态机边界/哈希链冲突/持久化
 ```
 
 ---
@@ -173,7 +176,8 @@ switchback/
 │   ├── trace.py              #   OTel 兼容可观测（Trace/Log/Metrics）
 │   ├── state.py              #   共享状态 + Agent 记忆
 │   ├── skills.py             #   六大核心 Skill（可执行）
-│   ├── cases/jingzhang.py    #   京张 84 分案例重放
+│   ├── cases/jingzhang.py    #   京张 84 分案例重放（城市设计评审）
+│   ├── cases/ops.py          #   运维事故自主闘环（零人工运维，跨行业复用）
 │   └── cli.py                #   CLI：init/register/verify/approve/reject/status/ledger/replay
 ├── tests/                    # 23 项测试
 ├── docs/                     # 协议/架构/Agent Identity/Skill/AgentTeams 映射

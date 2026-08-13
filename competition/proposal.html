@@ -322,7 +322,7 @@
 
   <div class="box">
     <div class="box-title">可执行代码包（初赛可选 · 本项目已交付）</div>
-    <p><strong>github.com/sukikeeling/switchback</strong>：Python 3.10+，<strong>零第三方运行依赖</strong>，<code>pip install -e .</code> 即跑；23 项 pytest 全绿；GitHub Actions CI 覆盖 Python 3.10/3.11/3.12。</p>
+    <p><strong>github.com/sukikeeling/switchback</strong>：Python 3.10+，<strong>零第三方运行依赖</strong>，<code>pip install -e .</code> 即跑；38 项 pytest 全绿（含状态机边界、哈希链冲突、持久化往返）；GitHub Actions CI 覆盖 Python 3.10/3.11/3.12。</p>
   </div>
 
   <h3>8.1 一键复现旗舰案例（真实输出）</h3>
@@ -343,7 +343,26 @@ v8.10    PR#2328   76    折返↩            ✓
 教训：'加内容' 5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。</span></pre>
   <p>每次提交都过"证据核验 → 折返点复核 → K 标放行/折返"，账本不可变、Trace 可回放。<span class="tag green">真实任务闭环</span><span class="tag green">结果校验</span><span class="tag green">安全熔断审计</span></p>
 
-  <h3>8.2 命令行全流程（评审可直接运行）</h3>
+  <h3>8.2 跨行业第二案例：运维事故自主闭环（已实现，非承诺）</h3>
+  <pre>$ python -m switchback.cli replay ops
+
+<span class="dim">== 运维事故自主闭环（Switchback Governance · 跨行业复用）==
+  事故 INC-2026-0813：支付服务 5xx 飙升</span>
+
+<span class="hl">阶段                裁决            坡度      证据</span>
+----------------------------------------------
+alert-triage        PASS          medium   ✓
+fix-v1              折返↩           steep    ✓
+fix-v2              PASS          medium   ✓
+recovery-verify     PASS          medium   ✓
+postmortem          PASS          gentle   ✓
+
+<span class="dim">关键：fix-v1 因回滚风险被责任人一票否决→侧线折返；fix-v2 金丝雀方案三方通过放行。
+折返 1 次，放行 4 次，全程不设自动恢复。
+跨行业复用实证：同一套折返治理协议，从城市设计评审到生产事故运维。</span></pre>
+  <p>同一套协议、同一套 Skill，无需改代码即可治理<span class="tag">城市设计评审</span><span class="tag">零人工运维</span>两类场景——"场景可复制性"实证而非口号。</p>
+
+  <h3>8.3 命令行全流程（评审可直接运行）</h3>
   <pre>$ python -m switchback.cli init
 $ python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
 $ python -m switchback.cli verify  jz-001 --claims claims.json --sources sources.json
@@ -351,11 +370,12 @@ $ python -m switchback.cli approve jz-001 --label release
 $ python -m switchback.cli status  jz-001
 $ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链并校验完整性</span></pre>
 
-  <h3>8.3 测试证据</h3>
+  <h3>8.4 测试证据（38 项）</h3>
   <ul>
-    <li><code>test_protocol.py</code>：折返裁决 / 一票否决 / 不设自动恢复 / 首次放行例外 / 账本篡改检测；</li>
-    <li><code>test_skills.py</code>：六 Skill 输入输出与组合；</li>
-    <li><code>test_jingzhang_case.py</code>：案例重放断言真实历史结果（v5/v8.1 放行、其余折返、最高 84）。</li>
+    <li><code>test_protocol.py</code>（14）：折返裁决 / 一票否决 / 不设自动恢复 / 首次放行例外 / 账本篡改检测；</li>
+    <li><code>test_boundaries.py</code>（15）：<strong>状态机边界</strong>（侧线返工回正线 / 多轮折返累积 / 全 DEPOT 票 / 混合票优先级 / 被放行又入段禁止自动恢复）、<strong>哈希链冲突</strong>（空账本 / 篡改 payload / 伪造 sha256 / 断链 prev / 持久化往返一致）、<strong>任务卡持久化往返</strong>；</li>
+    <li><code>test_skills.py</code>（8）：六 Skill 输入输出与组合；</li>
+    <li><code>test_jingzhang_case.py</code> + <code>test_ops_case</code>：两案例重放断言真实裁决结果。</li>
   </ul>
 </section>
 
@@ -366,9 +386,9 @@ $ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链�
   <h3>9.1 落地路线</h3>
   <table>
     <tr><th>阶段</th><th>内容</th><th>证据</th></tr>
-    <tr><td>已实现</td><td>折返治理协议 + 六 Skill + 京张案例重放 + 可观测</td><td>23 项测试 / CI / 复现输出</td></tr>
+    <tr><td>已实现</td><td>折返治理协议 + 六 Skill + 双案例（京张/运维）+ 可观测</td><td>38 项测试（含状态机边界/哈希链冲突）/ CI 全绿 / 双案例复现输出</td></tr>
     <tr><td>初赛→复赛（9.3）</td><td>AgentTeams 集群实际部署（Docker + Matrix 房间 + Higress）、Demo 视频</td><td>可执行代码包 → 运行 Demo</td></tr>
-    <tr><td>复赛→决赛（9.22）</td><td>跨行业样例（运维/客服/研发任选）、评测报告、生态 Skill 分发</td><td>现场 Demo + 审计链路展示</td></tr>
+    <tr><td>复赛→决赛（9.22）</td><td>评测报告、生态 Skill 分发、第三案例（客服/研发）</td><td>现场 Demo + 审计链路展示</td></tr>
   </table>
 
   <h3>9.2 治理协议跨行业复制（场景首发计划）</h3>

@@ -1,0 +1,42 @@
+{
+  "case": "ops-zero-touch",
+  "task": "生产事故 INC-2026-0813 自主闭环",
+  "stages": [
+    {
+      "stage": "alert-triage",
+      "verdict": "RELEASED",
+      "grade": "medium",
+      "evidence_ok": true
+    },
+    {
+      "stage": "fix-v1",
+      "verdict": "TURNED_BACK",
+      "grade": "steep",
+      "evidence_ok": true
+    },
+    {
+      "stage": "fix-v2",
+      "verdict": "RELEASED",
+      "grade": "medium",
+      "evidence_ok": true
+    },
+    {
+      "stage": "recovery-verify",
+      "verdict": "RELEASED",
+      "grade": "medium",
+      "evidence_ok": true
+    },
+    {
+      "stage": "postmortem",
+      "verdict": "RELEASED",
+      "grade": "gentle",
+      "evidence_ok": true
+    }
+  ],
+  "released": 4,
+  "turned_back": 1,
+  "km_count": 9,
+  "chain_integrity": true,
+  "lessons": 2,
+  "risks": 3
+}

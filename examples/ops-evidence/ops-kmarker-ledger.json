@@ -1,0 +1,122 @@
+{
+  "schema": "switchback.kmarker-ledger/v1",
+  "entries": [
+    {
+      "km": 0,
+      "id": "6c6759bae041",
+      "task_id": "alert-triage",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "stage": "alert-triage"
+      },
+      "prev_sha": "",
+      "sha256": "d1832934ac95b4c85a2dc4357a88a920f270f86e08f5fb23ab6fece5ada9afaa",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 1,
+      "id": "035ed3a25c46",
+      "task_id": "alert-triage",
+      "label": "K-release",
+      "payload": {
+        "stage": "alert-triage",
+        "verdict": "pass"
+      },
+      "prev_sha": "d1832934ac95b4c85a2dc4357a88a920f270f86e08f5fb23ab6fece5ada9afaa",
+      "sha256": "465c26f6a111e42f85576faa5de5e6ba6fa7d6003e07f5bda97d16f0f57a284c",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 2,
+      "id": "de23d3237492",
+      "task_id": "fix-v1",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "stage": "fix-v1"
+      },
+      "prev_sha": "465c26f6a111e42f85576faa5de5e6ba6fa7d6003e07f5bda97d16f0f57a284c",
+      "sha256": "78685f116ae8c364c5f8d0a7f6b4ce911e2b9e5beffc9220289d4710616d2194",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 3,
+      "id": "4e0c7f00521b",
+      "task_id": "fix-v2",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "stage": "fix-v2"
+      },
+      "prev_sha": "78685f116ae8c364c5f8d0a7f6b4ce911e2b9e5beffc9220289d4710616d2194",
+      "sha256": "80084140bfd40022147e7ef4a9cbcebba8c4f5b4b254c69a0eebc1ceb20c6c9e",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 4,
+      "id": "85f740b88c70",
+      "task_id": "fix-v2",
+      "label": "K-release",
+      "payload": {
+        "stage": "fix-v2",
+        "verdict": "pass"
+      },
+      "prev_sha": "80084140bfd40022147e7ef4a9cbcebba8c4f5b4b254c69a0eebc1ceb20c6c9e",
+      "sha256": "636686d34cfeb114ea3bd1aa303a115b01f4646d57c7a8d81998d5f2e3feb151",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 5,
+      "id": "66a05fbb0d8c",
+      "task_id": "recovery-verify",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "stage": "recovery-verify"
+      },
+      "prev_sha": "636686d34cfeb114ea3bd1aa303a115b01f4646d57c7a8d81998d5f2e3feb151",
+      "sha256": "8accea95ccfd725a1f1d2a39571d38873c8b35e21819788fa30a3aa0c02499ed",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 6,
+      "id": "28c653279bea",
+      "task_id": "recovery-verify",
+      "label": "K-release",
+      "payload": {
+        "stage": "recovery-verify",
+        "verdict": "pass"
+      },
+      "prev_sha": "8accea95ccfd725a1f1d2a39571d38873c8b35e21819788fa30a3aa0c02499ed",
+      "sha256": "235228d68e9bd6f0948ae17bc0aa5837fb2c7116b110b5bffa2b9acab9b38ac4",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 7,
+      "id": "890b02da5447",
+      "task_id": "postmortem",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "gentle",
+        "stage": "postmortem"
+      },
+      "prev_sha": "235228d68e9bd6f0948ae17bc0aa5837fb2c7116b110b5bffa2b9acab9b38ac4",
+      "sha256": "059d75cf916b0edd5cced53ac938091ef6a9af271cf2958f3bfc2ad81b7250f0",
+      "timestamp": "2026-08-13T16:03:46Z"
+    },
+    {
+      "km": 8,
+      "id": "c50bde624ad0",
+      "task_id": "postmortem",
+      "label": "K-release",
+      "payload": {
+        "stage": "postmortem",
+        "verdict": "pass"
+      },
+      "prev_sha": "059d75cf916b0edd5cced53ac938091ef6a9af271cf2958f3bfc2ad81b7250f0",
+      "sha256": "b221636a114d5f6d65358528cd79a38579a0a56682b1cea735082cca3d025d67",
+      "timestamp": "2026-08-13T16:03:46Z"
+    }
+  ]
+}

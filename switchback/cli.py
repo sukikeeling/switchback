@@ -137,6 +137,10 @@ def cmd_replay(args: argparse.Namespace) -> int:
         from .cases.jingzhang import run_jingzhang_case
         run_jingzhang_case(ws=_workspace(), headless=False)
         return 0
+    if args.case == "ops":
+        from .cases.ops import run_ops_case
+        run_ops_case(ws=_workspace(), headless=False)
+        return 0
     print(f"unknown case: {args.case}", file=sys.stderr)
     return 2
 
@@ -173,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
     l = sub.add_parser("ledger", help="dump K-marker chain")
 
     rep = sub.add_parser("replay", help="replay a built-in case")
-    rep.add_argument("case", choices=["jingzhang"])
+    rep.add_argument("case", choices=["jingzhang", "ops"])
 
     args = p.parse_args(argv)
     return {"init": cmd_init, "register": cmd_register, "verify": cmd_verify,

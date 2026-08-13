@@ -82,4 +82,4 @@
 
 - 每个 Skill 的 `SkillSpec` 是**机器可读声明**，可沉淀进 AgentTeams 生态（Skill 门户 / 自托管 AI 市场）。
 - 迁移成本：Skill 与协议解耦，输入/输出为 JSON 契约，替换实现（如换向量 RAG）只需协议适配。
-- 京张 84 分案例（`examples/cases/jingzhang.py`）是全部六 Skill 的一次真实组合演练。
+- 京张 84 分案例（`switchback/cases/jingzhang.py`，运行 `python -m switchback.cli replay jingzhang`）是全部六 Skill 的一次真实组合演练。

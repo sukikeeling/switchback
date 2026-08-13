@@ -93,14 +93,23 @@ class SwitchbackGovernor:
                 created_at=t["created_at"],
             )
             self._tasks[card.task_id] = card
-            if card.state == SwitchState.MAINLINE:
-                self._ever_mainline.add(card.task_id)
+        # ever_mainline 必须独立持久化：任务可能曾在正线、现已入段，
+        # 仅看当前 state 会漏掉"曾被放行"的历史 → 导致自动恢复守卫失效（状态漂移）。
+        self._ever_mainline = set(data.get("ever_mainline", []))
+        # 兜底：兼容旧格式（无 ever_mainline 字段）时，按当前 state 推断
+        if not self._ever_mainline:
+            for card in self._tasks.values():
+                if card.state == SwitchState.MAINLINE:
+                    self._ever_mainline.add(card.task_id)
 
     def _save_tasks(self) -> None:
         if not self.tasks_path:
             return
-        data = {"schema": "switchback.tasks/v1",
-                "tasks": [t.to_dict() for t in self._tasks.values()]}
+        data = {
+            "schema": "switchback.tasks/v1",
+            "tasks": [t.to_dict() for t in self._tasks.values()],
+            "ever_mainline": sorted(self._ever_mainline),
+        }
         with open(self.tasks_path, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
 
