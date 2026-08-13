@@ -1,0 +1,53 @@
+{
+  "case": "jingzhang-84",
+  "task": "百年京张 AI 创新带开源征集方案",
+  "submissions": [
+    {
+      "version": "v5",
+      "pr": "PR#605",
+      "score": 67,
+      "verdict": "RELEASED",
+      "evidence_ok": true
+    },
+    {
+      "version": "v8",
+      "pr": "PR#1220",
+      "score": 70,
+      "verdict": "TURNED_BACK",
+      "evidence_ok": true
+    },
+    {
+      "version": "v8.1",
+      "pr": "PR#1468",
+      "score": 84,
+      "verdict": "RELEASED",
+      "evidence_ok": true
+    },
+    {
+      "version": "v8.2",
+      "pr": "PR#1816",
+      "score": 70,
+      "verdict": "TURNED_BACK",
+      "evidence_ok": true
+    },
+    {
+      "version": "v8.5",
+      "pr": "PR#2205",
+      "score": 77,
+      "verdict": "TURNED_BACK",
+      "evidence_ok": true
+    },
+    {
+      "version": "v8.10",
+      "pr": "PR#2328",
+      "score": 76,
+      "verdict": "TURNED_BACK",
+      "evidence_ok": true
+    }
+  ],
+  "best_score": 84,
+  "km_count": 8,
+  "chain_integrity": true,
+  "lessons": 5,
+  "risks": 3
+}

@@ -1,0 +1,111 @@
+{
+  "schema": "switchback.kmarker-ledger/v1",
+  "entries": [
+    {
+      "km": 0,
+      "id": "c6aef38071fa",
+      "task_id": "jingzhang-v5",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "pr": "PR#605"
+      },
+      "prev_sha": "",
+      "sha256": "59672e4c025dd86a44a010e07135286e2ea5dedbcd5091f9c26042a7e574162e",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 1,
+      "id": "a928086df067",
+      "task_id": "jingzhang-v5",
+      "label": "K-release",
+      "payload": {
+        "score": 67,
+        "pr": "PR#605",
+        "verdict": "pass"
+      },
+      "prev_sha": "59672e4c025dd86a44a010e07135286e2ea5dedbcd5091f9c26042a7e574162e",
+      "sha256": "ff9b86af99469cf3b823a9378f6bd60f4865cfd772275a3b242f100c007c9320",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 2,
+      "id": "ffe2d65c5ded",
+      "task_id": "jingzhang-v8",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "pr": "PR#1220"
+      },
+      "prev_sha": "ff9b86af99469cf3b823a9378f6bd60f4865cfd772275a3b242f100c007c9320",
+      "sha256": "8bd717413f9a7aeb462bea8c4e83a178d529af0ca5125ad06bf1f4a77c005f5f",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 3,
+      "id": "0c315b3d17fe",
+      "task_id": "jingzhang-v8.1",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "pr": "PR#1468"
+      },
+      "prev_sha": "8bd717413f9a7aeb462bea8c4e83a178d529af0ca5125ad06bf1f4a77c005f5f",
+      "sha256": "1783d404aeb2c93ecbb1b46ba2db706ed2c697adae949d52c4af9a0aab3e818c",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 4,
+      "id": "cd0b6ab63f59",
+      "task_id": "jingzhang-v8.1",
+      "label": "K-release",
+      "payload": {
+        "score": 84,
+        "pr": "PR#1468",
+        "verdict": "pass"
+      },
+      "prev_sha": "1783d404aeb2c93ecbb1b46ba2db706ed2c697adae949d52c4af9a0aab3e818c",
+      "sha256": "717a764fbaf599a916e7c98f81a78f1e1a34c14b1043150c417859fa9ec8da5e",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 5,
+      "id": "d9a51ec1e586",
+      "task_id": "jingzhang-v8.2",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "pr": "PR#1816"
+      },
+      "prev_sha": "717a764fbaf599a916e7c98f81a78f1e1a34c14b1043150c417859fa9ec8da5e",
+      "sha256": "f843df64080ead60babaf016f4a28934538c8cb1edbbf6b138822f4fd8b0ae31",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 6,
+      "id": "16515a225606",
+      "task_id": "jingzhang-v8.5",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "pr": "PR#2205"
+      },
+      "prev_sha": "f843df64080ead60babaf016f4a28934538c8cb1edbbf6b138822f4fd8b0ae31",
+      "sha256": "bda9acab693b7f9c084dd7f9004a04a18d7fff95547441263b0d32677d9b8aa6",
+      "timestamp": "2026-08-13T12:19:38Z"
+    },
+    {
+      "km": 7,
+      "id": "3f1c90dbfc21",
+      "task_id": "jingzhang-v8.10",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "pr": "PR#2328"
+      },
+      "prev_sha": "bda9acab693b7f9c084dd7f9004a04a18d7fff95547441263b0d32677d9b8aa6",
+      "sha256": "246197bb7ff4342edb208fb1111ee856a2d4ef58f9b4c5f05e06e9156e25c42d",
+      "timestamp": "2026-08-13T12:19:38Z"
+    }
+  ]
+}
