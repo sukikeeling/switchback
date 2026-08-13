@@ -1,0 +1,10 @@
+{
+  "title": "京张方案 v8.1",
+  "score": 84,
+  "score_alt1": 84,
+  "score_alt2": 84,
+  "pr": "PR#1468",
+  "note": "P0/P1 全量修复：指标重算/双语等价/无证据精度清除/版本统一/权利声明",
+  "evidence": "source:OFFICIAL-CALL, source:SCORE",
+  "content_sha256": "e09eefc2ddaf98f5367247ab0a9645ae110c0cefc6ac715701435bc4d9dedb98"
+}

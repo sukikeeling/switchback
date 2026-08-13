@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>折返治理 Switchback · GOAI 初赛方案</title>
+<style>
+  :root{
+    --rail:#123a5f; --rail-2:#0c2c49; --green:#2f7d5a; --copper:#b0763c;
+    --ink:#1c2733; --muted:#5a6b7a; --line:#dde4ea; --bg:#f6f8fa; --warn:#a83a2c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);line-height:1.62;font-size:11.5px;}
+  @page{size:A4;margin:16mm 15mm 16mm 15mm;}
+  .page{page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+  h1,h2,h3,h4{line-height:1.3;}
+  .mono{font-family:Consolas,"Cascadia Code",monospace;font-size:9.5px;}
+
+  /* 封面 */
+  .cover{display:flex;flex-direction:column;justify-content:center;min-height:250mm;}
+  .cover .kicker{color:var(--green);font-weight:600;letter-spacing:.2em;font-size:12px;text-transform:uppercase;}
+  .cover h1{font-size:40px;color:var(--rail-2);margin:14px 0 6px;letter-spacing:.02em;}
+  .cover .en{font-size:16px;color:var(--muted);font-weight:600;margin-bottom:22px;}
+  .cover .slogan{font-size:16px;color:var(--copper);border-left:4px solid var(--copper);padding-left:12px;margin:18px 0 8px;}
+  .cover .meta{margin-top:34px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px;}
+  .cover .rail{height:8px;background:repeating-linear-gradient(90deg,var(--rail) 0 30px,var(--copper) 30px 46px,var(--rail) 46px 76px);border-radius:4px;margin-top:30px;}
+
+  /* 章节 */
+  .sec-title{color:var(--rail);font-size:19px;border-bottom:3px solid var(--rail);padding-bottom:6px;margin:0 0 12px;}
+  .sec-num{color:var(--copper);font-weight:700;}
+  h3{color:var(--rail);font-size:13.5px;margin:14px 0 6px;}
+  h4{color:var(--ink);font-size:12px;margin:10px 0 4px;}
+  p{margin:6px 0;}
+  ul,ol{margin:6px 0 6px 18px;}
+  li{margin:3px 0;}
+
+  table{border-collapse:collapse;width:100%;margin:8px 0 12px;font-size:10.5px;}
+  th{background:var(--rail);color:#fff;text-align:left;padding:6px 8px;font-weight:600;}
+  td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;}
+  tr:nth-child(even) td{background:var(--bg);}
+
+  .box{border:1px solid var(--line);border-left:4px solid var(--rail);background:var(--bg);padding:10px 12px;margin:10px 0;border-radius:3px;}
+  .box.green{border-left-color:var(--green);}
+  .box.copper{border-left-color:var(--copper);}
+  .box.warn{border-left-color:var(--warn);}
+  .box .box-title{font-weight:700;color:var(--rail);margin-bottom:4px;}
+
+  pre{background:#0c2c49;color:#dbe8f4;padding:12px 14px;border-radius:4px;font-size:9.5px;overflow:hidden;line-height:1.5;}
+  pre .hl{color:#7ce7a8;font-weight:700;}
+  pre .dim{color:#7f95ab;}
+  code{background:#eef2f6;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:10px;}
+  pre code{background:none;padding:0;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .tag{display:inline-block;background:var(--rail);color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;margin-right:4px;}
+  .tag.green{background:var(--green);} .tag.copper{background:var(--copper);}
+
+  /* 架构图 */
+  .arch{border:2px solid var(--rail);border-radius:6px;padding:10px;margin:10px 0;}
+  .arch .row{display:flex;gap:8px;margin:6px 0;}
+  .arch .cell{flex:1;border:1px solid var(--line);border-radius:4px;padding:8px;background:var(--bg);text-align:center;}
+  .arch .cell strong{display:block;color:var(--rail);font-size:11px;}
+  .arch .cell small{color:var(--muted);font-size:9px;}
+  .arch .governor{background:#eef5f0;border-color:var(--green);}
+  .arrow{text-align:center;color:var(--copper);font-weight:700;margin:2px 0;}
+
+  .foot{color:var(--muted);font-size:9px;margin-top:16px;border-top:1px solid var(--line);padding-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- ================= 封面 ================= -->
+<section class="page cover">
+  <div class="kicker">GOAI World AI Open Source Competition 2026 · Hangzhou · Track 1 · Agent Infra</div>
+  <h1>折返治理 · Switchback</h1>
+  <div class="en">Switchback Governance — the Human-in-the-Loop Governance Layer for Multi-Agent Teams</div>
+  <div class="slogan">让每一次 Agent 决策，都沿轨道可查、可停、可回头。</div>
+  <div class="slogan" style="border-color:var(--green);color:var(--green);">Every agent decision must be traceable, stoppable, and reversible on the rail.</div>
+
+  <div class="rail"></div>
+
+  <div class="meta">
+    <p><strong>赛道</strong>：① 新智基座 Agent Infra —— 多 Agent 分工协同、可复用、可观测的端到端任务闭环</p>
+    <p><strong>参赛主体</strong>：sukikeeling（AI Agent 协作参赛，个人/≤3 人组队）</p>
+    <p><strong>项目仓库</strong>：github.com/sukikeeling/switchback（Apache-2.0，零依赖可运行）</p>
+    <p><strong>旗舰证据</strong>：百年京张 AI 创新带开源征集 84/100 最高纪录（open-city-ai/haidian）</p>
+    <p><strong>日期</strong>：2026-08-13 ｜ <strong>初赛</strong>：方案设计（本 PDF + 代码包可选）</p>
+  </div>
+</section>
+
+<!-- ================= 一、场景与价值 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">一、</span>场景与价值（Why）</div>
+
+  <h3>1.1 问题：Agent 从 Demo 到 Production 的四道坎</h3>
+  <p>多 Agent 系统跑通 demo 很容易，上生产最难的不是"能不能跑通"，而是四道治理鸿沟：</p>
+  <table>
+    <tr><th>鸿沟</th><th>生产症状</th><th>本方案应答</th></tr>
+    <tr><td><strong>结果不可信</strong></td><td>数值三处对不齐、引用错位、模型幻觉</td><td>证据核验 Skill：数值三处对齐 + 引用双向 + 内容哈希</td></tr>
+    <tr><td><strong>过程不可停</strong></td><td>编排一旦开始就自动往下走，错误被一路放大</td><td>折返点：到站必停，复核后才继续</td></tr>
+    <tr><td><strong>出事不可回</strong></td><td>没有审批/回滚/隔离语义，只能"硬杀进程"</td><td>道岔三态：正线 / 侧线折返 / 入段检修，不设自动恢复</td></tr>
+    <tr><td><strong>账目不可审</strong></td><td>谁做了什么、基于哪个数据版本、结论是什么，无账本</td><td>K 标账本：内容寻址哈希链，逐条可复核</td></tr>
+  </table>
+
+  <h3>1.2 真实场景：一场真实竞赛的 16 轮治理实验</h3>
+  <p>本方案不是概念 Demo，而是一段<strong>真实任务闭环</strong>的产品化：参赛主体 sukikeeling 参加了"百年京张 AI 创新带国际城市设计开源征集"（海淀区主办，open-city-ai/haidian），面对确定性 CI 门禁与官方多模态 AI 评审（CocoSgt，100 分制），16 个 PR 中亲历全部治理事故，最终以 <strong>84/100 拿下最高纪录</strong>：</p>
+  <ul>
+    <li><code>package_id 残留</code> —— 长会话状态漂移，v8 旧值混入新版本；</li>
+    <li><code>CRLF 哈希错位</code> —— 证据链断裂，逐文件哈希核对发现换行符差异；</li>
+    <li><code>中英标记漂移 42 处</code> —— 双语文档一致性失控；</li>
+    <li><code>数值三处对不齐</code> —— 面积/指标在不同章节复算结果不同。</li>
+  </ul>
+  <div class="box green">
+    <div class="box-title">为什么要做"治理层"</div>
+    <p>这些事故的根因不是某个 Agent 能力不够，而是<strong>缺少"到站必停"的制度</strong>。京张项目最终的高分配方——原创概念 + 克制表达 + 结构化证据 + 折返复核——正是把踩过的坑制度化为协议。这个协议对任何多 Agent 生产系统都可复制：<span class="tag">零人工运维</span><span class="tag">智能客服</span><span class="tag">软件研发协同</span><span class="tag">金融风控理赔</span></p>
+  </div>
+
+  <h3>1.3 行业可复制性</h3>
+  <table>
+    <tr><th>赛道参考方向</th><th>折返治理落点</th></tr>
+    <tr><td>零人工运维（告警→根因→修复→恢复→复盘）</td><td>每次修复走 evidence-verify + 折返点；回滚即"侧线折返"</td></tr>
+    <tr><td>智能客服自主闭环</td><td>意图分级即坡度分级；客户确认即"公众代表"复核；案例复盘即 lessons-learned</td></tr>
+    <tr><td>软件研发全流程协同</td><td>缺陷修复→测试验证→发布确认全部进折返点；K 标即变更留痕</td></tr>
+    <tr><td>金融风控与理赔自动化</td><td>多源信号聚合→风险核实→处置→合规审计：风险台账 + 不可变账本原生适配</td></tr>
+  </table>
+</section>
+
+<!-- ================= 二、核心洞察 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">二、</span>核心洞察：铁路的"人字坡"智慧</div>
+
+  <div class="box copper">
+    <div class="box-title">制度原型：青龙桥"人字形折返"展线</div>
+    <p>1908 年，詹天佑在八达岭 33‰ 极限坡度上设计"人字形"展线：列车无法直爬陡坡，必须在<strong>折返点停车、换向、以退为进</strong>。这条铁路运行 118 年零重大事故的教训是——<strong>在能力极限前主动停下重估，比硬闯更接近安全与效率的最优解</strong>。</p>
+  </div>
+
+  <p><strong>核心洞察</strong>：多 Agent 协同系统与陡坡列车同构——任务爬坡（难度/风险升高）时，Agent 的自回归式自动续行就是"硬闯陡坡"。治理的关键不是更强的模型，而是<strong>制度化的折返点</strong>：让系统在关键节点"必停、复核、可回头"。</p>
+
+  <h3>2.1 四大机制（一句话版）</h3>
+  <table>
+    <tr><th>机制</th><th>铁路原型</th><th>Agent 工程转译</th><th>代码落点</th></tr>
+    <tr><td><strong>折返点</strong> Switchback Node</td><td>到折返点必停</td><td>固定检查点，任何一方否决即强制折返</td><td><code>Checkpoint.resolve()</code></td></tr>
+    <tr><td><strong>坡度分级</strong> Grade-based Access</td><td>33‰ 分陡缓</td><td>缓/中/陡三级，越陡复核越严</td><td><code>grade_access()</code></td></tr>
+    <tr><td><strong>K 标版本</strong> K-marker</td><td>铁路里程标</td><td>不可变内容寻址哈希链，永久留痕</td><td><code>KMarkerLedger.append()</code></td></tr>
+    <tr><td><strong>道岔三态</strong> Switch States</td><td>正线/侧线/入段</td><td>状态机，不设自动恢复</td><td><code>governor.switch()</code></td></tr>
+  </table>
+
+  <h3>2.2 一句话说服力</h3>
+  <div class="box green">
+    <div class="box-title">对评审的对应</div>
+    <p>赛道 1 评审点"结果校验、复审、安全熔断审计"，正是本协议的四条不变量：<strong>到站必停</strong>（熔断）、<strong>任何否决即折返</strong>（复审）、<strong>K 标不可篡改</strong>（审计）、<strong>不设自动恢复</strong>（安全）。治理理念即工程机制——这是本方案最直接的叙事桥梁。</p>
+  </div>
+</section>
+
+<!-- ================= 三、方案设计 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">三、</span>方案设计：折返治理协议（What）</div>
+
+  <h3>3.1 架构总览</h3>
+  <div class="arch">
+    <div class="row">
+      <div class="cell"><strong>人（人工监理）</strong><small>CLI / Matrix 客户端 · 观察 · 实时干预 · 终审</small></div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="row">
+      <div class="cell governor"><strong>G-GOVERNOR 监理 Agent</strong><small>折返点裁决 · 坡度准入 · 道岔三态 · K标账本 · 不设自动恢复</small></div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="row">
+      <div class="cell"><strong>AgentTeams 编排层</strong><small>Manager-Worker + Matrix 房间 + Higress 网关</small><br><small>M-OPER 运营总监 → 拆解/调度</small></div>
+    </div>
+    <div class="row">
+      <div class="cell"><strong>W-RESEARCH</strong><small>调研/来源</small></div>
+      <div class="cell"><strong>W-CREATE</strong><small>内容/双语</small></div>
+      <div class="cell"><strong>W-VERIFY</strong><small>校验/复算</small></div>
+      <div class="cell"><strong>W-RISK</strong><small>风险/合规</small></div>
+    </div>
+    <div class="row">
+      <div class="cell"><strong>基础设施</strong><small>SharedState 共享状态 · AgentMemory 记忆 · Tracer 可观测 · MCP 工具</small></div>
+    </div>
+  </div>
+
+  <h3>3.2 协议不变量（可复算、可复核、可接手）</h3>
+  <ol>
+    <li><strong>到站必停</strong>：每个折返点未裁决前，任务不得越过该点继续执行。</li>
+    <li><strong>任何否决即折返</strong>：一票 <code>TURN_BACK / DEPOT</code> ⇒ 整点折返/入段，绝不因多数票放行。</li>
+    <li><strong>坡度越高越严</strong>：陡坡需三方（责任人/专业/公众）复核，缓坡仅责任人。</li>
+    <li><strong>K 标不可篡改</strong>：SHA-256 内容寻址哈希链，篡改即断链。</li>
+    <li><strong>不设自动恢复</strong>：已被放行、又被拉回检修的任务禁止自动回正线，必须全新复核。</li>
+    <li><strong>票齐才裁决</strong>：缺票即拒绝裁决，不搞少数服从多数。</li>
+  </ol>
+
+  <h3>3.3 状态机（道岔三态）</h3>
+  <pre>  首次准入（准入闸门，受允许）
+      ┌──────────────────────────────┐
+      ▼                              │
+   ┌──────────┐  否决(折返)   ┌──────────┐
+   │ DEPOT 入段│ ──────────────►│ SIDING 侧线│  返工后重过折返点
+   └──────────┘                └──────────┘        │
+        ▲                            │             ▼
+        │ 重新评估(全新approval)       └──────► MAINLINE 正线运行
+        └────────────────────────────────────── (放行/继续)</pre>
+  <div class="box warn">
+    <div class="box-title">关键：不设自动恢复</div>
+    <p>京张项目 5 轮"内容增强"全部无效（70 是基准、84 是孤例）的教训说明：<strong>自动续行会放大错误</strong>。本协议强制检修态回正线需经折返点重新评估——<code>NoAutoResumeError</code> 是安全熔断的工程化表达。</p>
+  </div>
+</section>
+
+<!-- ================= 四、多Agent协同设计 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">四、</span>多 Agent 协同设计（以 AgentTeams 为设计基点）</div>
+
+  <div class="box">
+    <div class="box-title">设计基点：AgentTeams（原名 Hiclaw）</div>
+    <p>按赛道要求，协同设计以 AgentTeams（开源多 Agent OS）为基点：<strong>Manager Agent 协调多个 Worker Agent 在 Matrix 房间中协作，全程对人类可见、可实时干预</strong>；Worker 仅持消费者令牌、不持真实 API Key；经 Higress AI Gateway 安全访问 LLM 与外部 API / MCP Servers / Skills（出处：hiclaw.io、github.com/alibaba/hiclaw）。</p>
+  </div>
+
+  <h3>4.1 Agent Identity 清单（6 个身份）</h3>
+  <table>
+    <tr><th>ID</th><th>角色</th><th>类型</th><th>职责</th><th>AgentTeams 落位</th></tr>
+    <tr><td><code>M-OPER</code></td><td>运营总监</td><td>Manager</td><td>任务接单、坡度拆解、调度、触发折返点</td><td>Manager Agent（Control Flow）</td></tr>
+    <tr><td><code>W-RESEARCH</code></td><td>调研专员</td><td>Worker</td><td>情报采集、事实核验、来源管理</td><td>Worker + MCP（经 Higress）</td></tr>
+    <tr><td><code>W-CREATE</code></td><td>内容专员</td><td>Worker</td><td>结构化工件生产、双语输出</td><td>Worker + Skill</td></tr>
+    <tr><td><code>W-VERIFY</code></td><td>校验专员</td><td>Worker</td><td>数值三处对齐、引用双向、哈希核对、复算</td><td>Worker + evidence-verify</td></tr>
+    <tr><td><code>W-RISK</code></td><td>风险与合规</td><td>Worker</td><td>风险台账、权利声明、合规矩阵</td><td>Worker + 审计记录</td></tr>
+    <tr><td><code>G-GOVERNOR</code></td><td>监理 Agent</td><td>治理组件</td><td>折返裁决、坡度准入、道岔三态、不设自动恢复</td><td>Matrix 房间人机可见、可干预</td></tr>
+  </table>
+
+  <h3>4.2 闭环 8 步映射</h3>
+  <table>
+    <tr><th>步骤</th><th>执行者</th><th>机制落点</th></tr>
+    <tr><td>① 任务输入</td><td>M-OPER</td><td>Matrix 房间接单，登记任务卡</td></tr>
+    <tr><td>② 任务拆解</td><td>M-OPER</td><td>坡度分级（grade-access）→ 子任务 DAG</td></tr>
+    <tr><td>③ 上下文传递</td><td>全 Agent</td><td>Matrix 共享上下文 + SharedState（K 标溯源）</td></tr>
+    <tr><td>④ 工具调用</td><td>Worker</td><td>经 Higress 调 MCP 工具，凭证透传</td></tr>
+    <tr><td>⑤ 结果验证</td><td>W-VERIFY</td><td>evidence-verify：三处对齐/双向引用/哈希</td></tr>
+    <tr><td>⑥ 执行证据沉淀</td><td>G-GOVERNOR</td><td>K 标账本 seal（不可变哈希链）</td></tr>
+    <tr><td>⑦ 审批与回滚</td><td>G-GOVERNOR + 人</td><td>折返点三方复核 → 放行/折返/入段（不设自动恢复）</td></tr>
+    <tr><td>⑧ 经验沉淀</td><td>全 Agent</td><td>lessons-learned 写回 AgentMemory → 教训-规则闭环</td></tr>
+  </table>
+
+  <h3>4.3 上下文与 RAG（4 选 2，本项目做 3 项）</h3>
+  <ul>
+    <li><strong>共享状态管理</strong> <code>SharedState</code>：Manager 写、Worker 读，带 K 标版本溯源，杜绝 <code>package_id 残留</code>式漂移；</li>
+    <li><strong>Agent 记忆存储</strong> <code>AgentMemory</code>：追加式情景记忆 + 关键词检索，是知识库 RAG 的种子层，可协议适配替换向量索引；</li>
+    <li><strong>轨迹可观测</strong> <code>Tracer</code>：OTel 形状事件流即执行轨迹。</li>
+  </ul>
+</section>
+
+<!-- ================= 五、Skill工程 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">五、</span>Skill 工程体系与生态复用</div>
+
+  <p>六大核心 Skill 全部以<strong>可执行 Python 函数</strong>实现（<code>switchback/skills.py</code>），每个携带机器可读 <code>SkillSpec</code>（名称/用途/输入输出/调用条件/依赖/失败处理/安全边界/复用价值），可沉淀进 AgentTeams Skill 生态。</p>
+
+  <table>
+    <tr><th>Skill</th><th>用途</th><th>输入→输出</th><th>失败处理</th><th>复用价值</th></tr>
+    <tr><td><code>grade-access</code></td><td>坡度分级准入</td><td>task payload → Grade</td><td>无法判定默认陡坡（从严）</td><td>任务准入层</td></tr>
+    <tr><td><code>evidence-verify</code></td><td>证据核验</td><td>claims+sources → VerificationReport</td><td>任一失败 → 强制折返</td><td>防幻觉第一闸门</td></tr>
+    <tr><td><code>kmarker-ledger</code></td><td>K 标账本</td><td>task+label+payload → KMarker</td><td>断链 → 拒绝写入</td><td>审计留痕</td></tr>
+    <tr><td><code>risk-ledger</code></td><td>风险台账</td><td>风险字段 → 条目</td><td>score≥4 → 强制人工复核</td><td>合规风险视图</td></tr>
+    <tr><td><code>switch-decision</code></td><td>折返裁决</td><td>Checkpoint → Verdict</td><td>缺票 → 拒绝裁决</td><td>审批/回滚核心</td></tr>
+    <tr><td><code>lessons-learned</code></td><td>经验沉淀</td><td>复盘结论 → MemoryEntry</td><td>失败不阻断主线</td><td>越用越聪明</td></tr>
+  </table>
+
+  <div class="box green">
+    <div class="box-title">实证：evidence-verify 的京张检验</div>
+    <p>京张的 <code>CRLF 哈希错位</code>、<code>数值三处对不齐</code>、<code>引用缺失</code> 正是该 Skill 的设计输入；每一版提交在放行前都经其核验。核验失败 → <code>governor.turn_back()</code> → 任务进侧线返工，不自动续行。</p>
+  </div>
+</section>
+
+<!-- ================= 六、工具与集成 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">六、</span>工具与集成（MCP / 可观测 / RAG）</div>
+
+  <h3>6.1 MCP 与工具集成契约（推荐项）</h3>
+  <p>采用 AgentTeams 的标准接入：Worker 经 <strong>Higress AI Gateway</strong> 访问外部 API / MCP Servers / Skills，凭证透传 + 消费者令牌。集成契约四要素：</p>
+  <table>
+    <tr><th>契约</th><th>本方案</th></tr>
+    <tr><td>协议</td><td>MCP（经 Higress；必要时自有 JSON 契约等价实现）</td></tr>
+    <tr><td>鉴权</td><td>凭证透传；Worker 不持真实 Key，仅持消费者令牌</td></tr>
+    <tr><td>输入输出 Schema</td><td>Skill 的 <code>SkillSpec</code> 声明（JSON）</td></tr>
+    <tr><td>错误处理与审计</td><td>失败进折返点（折返/入段）；K 标账本 + trace 全程记录</td></tr>
+  </table>
+  <p><strong>迁移成本判断</strong>：Skill 与协议解耦、契约即 JSON，未来迁 MCP 只需协议适配，无需重设计工具调用链。</p>
+
+  <h3>6.2 可观测（推荐项）</h3>
+  <ul>
+    <li><strong>Trace/Log/Metrics 三类全覆盖</strong>：<code>Tracer</code> 输出 OTel 形状 JSONL（SPAN_START/SPAN_END/LOG）+ 指标计数器，满足"建议遵循 OpenTelemetry GenAI 标准"；</li>
+    <li><strong>评估</strong>：基于观测数据支持复算与逐 K 标核对，量化推理效果与效率。</li>
+  </ul>
+
+  <h3>6.3 推荐的生态工具对齐（不堆叠，说明设计理念与可替换性）</h3>
+  <p>框架层以 AgentTeams 为基点；网关 Higress；可观测与 AI 管理中心（Nacos/AgentLoop 等）按需接入。评审重点在设计理念、接口契约、必要性、可替换性、权限边界与端到端闭环证据，本项目全部以代码与案例给出。</p>
+</section>
+
+<!-- ================= 七、安全与合规 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">七、</span>安全、风险控制与合规</div>
+
+  <h3>7.1 权限边界</h3>
+  <ul>
+    <li>唯一能改变任务状态的是 <code>G-GOVERNOR</code>；Worker 只能产出工件与复核结果，不能自我放行；</li>
+    <li>凭证不落 Worker（消费者令牌模型）；人工在 Matrix 房间内行使"终审/公众代表"职权。</li>
+  </ul>
+
+  <h3>7.2 风险台账（结构化，score≥4 强制人工复核）</h3>
+  <table>
+    <tr><th>风险</th><th>评分</th><th>缓释</th><th>人工复核</th></tr>
+    <tr><td>Agent 数值幻觉与引用错位</td><td>4</td><td>evidence-verify 强制三处对齐 + 双向引用 + 内容哈希</td><td>专业复核</td></tr>
+    <tr><td>长会话状态漂移</td><td>4</td><td>K 标版本 + SharedState 溯源（阻断 package_id 残留）</td><td>运营 Agent 复核</td></tr>
+    <tr><td>第三方素材权利边界不清</td><td>3</td><td>rights-ledger 逐资产登记 + 许可证检查</td><td>法务复核</td></tr>
+  </table>
+
+  <h3>7.3 审计与回滚</h3>
+  <p>K 标账本（不可变哈希链）+ OTel 兼容 trace 构成端到端审计链路：<strong>谁、何时、基于哪个 K 标、结论的哈希</strong> 全部可复核；回滚即"侧线折返 / 入段检修"，且不设自动恢复。</p>
+</section>
+
+<!-- ================= 八、工程落地与运行验证 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">八、</span>工程落地、运行验证与可复现</div>
+
+  <div class="box">
+    <div class="box-title">可执行代码包（初赛可选 · 本项目已交付）</div>
+    <p><strong>github.com/sukikeeling/switchback</strong>：Python 3.10+，<strong>零第三方运行依赖</strong>，<code>pip install -e .</code> 即跑；23 项 pytest 全绿；GitHub Actions CI 覆盖 Python 3.10/3.11/3.12。</p>
+  </div>
+
+  <h3>8.1 一键复现旗舰案例（真实输出）</h3>
+  <pre>$ python -m switchback.cli replay jingzhang
+
+<span class="dim">== 京张 84 分案例重放（Switchback Governance in action）==</span>
+
+<span class="hl">版本      PR        分    裁决            证据</span>
+-----------------------------------------------
+v5       PR#605    67    PASS            ✓
+v8       PR#1220   70    折返↩            ✓
+v8.1     PR#1468   84    PASS            ✓
+v8.2     PR#1816   70    折返↩            ✓
+v8.5     PR#2205   77    折返↩            ✓
+v8.10    PR#2328   76    折返↩            ✓
+
+<span class="dim">最高分：84（v8.1 PR#1468）→ 84 高水位保持
+教训：'加内容' 5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。</span></pre>
+  <p>每次提交都过"证据核验 → 折返点复核 → K 标放行/折返"，账本不可变、Trace 可回放。<span class="tag green">真实任务闭环</span><span class="tag green">结果校验</span><span class="tag green">安全熔断审计</span></p>
+
+  <h3>8.2 命令行全流程（评审可直接运行）</h3>
+  <pre>$ switchback init
+$ switchback register jz-001 --title "京张方案 v8.1" --grade steep
+$ switchback verify  jz-001 --claims claims.json --sources sources.json
+$ switchback approve jz-001 --label release
+$ switchback status  jz-001
+$ switchback ledger    <span class="dim"># 输出 K 标哈希链并校验完整性</span></pre>
+
+  <h3>8.3 测试证据</h3>
+  <ul>
+    <li><code>test_protocol.py</code>：折返裁决 / 一票否决 / 不设自动恢复 / 首次放行例外 / 账本篡改检测；</li>
+    <li><code>test_skills.py</code>：六 Skill 输入输出与组合；</li>
+    <li><code>test_jingzhang_case.py</code>：案例重放断言真实历史结果（v5/v8.1 放行、其余折返、最高 84）。</li>
+  </ul>
+</section>
+
+<!-- ================= 九、可行性与落地计划 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">九、</span>可行性与落地计划</div>
+
+  <h3>9.1 落地路线</h3>
+  <table>
+    <tr><th>阶段</th><th>内容</th><th>证据</th></tr>
+    <tr><td>已实现</td><td>折返治理协议 + 六 Skill + 京张案例重放 + 可观测</td><td>23 项测试 / CI / 复现输出</td></tr>
+    <tr><td>初赛→复赛（9.3）</td><td>AgentTeams 集群实际部署（Docker + Matrix 房间 + Higress）、Demo 视频</td><td>可执行代码包 → 运行 Demo</td></tr>
+    <tr><td>复赛→决赛（9.22）</td><td>跨行业样例（运维/客服/研发任选）、评测报告、生态 Skill 分发</td><td>现场 Demo + 审计链路展示</td></tr>
+  </table>
+
+  <h3>9.2 治理协议跨行业复制（场景首发计划）</h3>
+  <p>协议与业务解耦：换 Skill、换 MCP 工具即可迁移。四个参考方向均已给出落点（见 1.3），最优先落地"零人工运维"（与京张"提交-评审-修复"闭环同构）。</p>
+
+  <h3>9.3 风险与应对（本方案自身的风险台账）</h3>
+  <table>
+    <tr><th>风险</th><th>应对</th></tr>
+    <tr><td>治理协议被误读为"流程审批系统"</td><td>定位为"人机监理"；强调折返点的制度原型与可复算不变量</td></tr>
+    <tr><td>复赛 AgentTeams 部署复杂度</td><td>协议与框架解耦，先容器化单机 demo，再上集群</td></tr>
+    <tr><td>零依赖范围限制（无真实 LLM 调用）</td><td>初赛以方案设计为主；复赛接入 AgentTeams + LLM 补全可运行 Demo</td></tr>
+  </table>
+</section>
+
+<!-- ================= 十、开放开源 ================= -->
+<section class="page">
+  <div class="sec-title"><span class="sec-num">十、</span>开放 / 开源计划</div>
+
+  <ul>
+    <li><strong>协议</strong>：Apache-2.0，全量开源（与 AgentTeams/Hiclaw 一致）；</li>
+    <li><strong>仓库</strong>：github.com/sukikeeling/switchback —— README（中英）、协议规范、架构、Agent Identity、Skill 清单、CI、SECURITY、CONTRIBUTING 齐备；</li>
+    <li><strong>数据与权利</strong>：京张案例数据来自公开开源竞赛仓库，demo 不含非公开/受限数据；逐资产权利登记（rights-ledger）；</li>
+    <li><strong>依赖边界</strong>：运行零第三方依赖；开发依赖仅 pytest——第三方依赖与 API 调用边界清晰可审计；</li>
+    <li><strong>生态</strong>：Skill 的 <code>SkillSpec</code> 可沉淀进 AgentTeams Skill 门户 / AI 市场，向社区开放复用。</li>
+  </ul>
+
+  <div class="box green">
+    <div class="box-title">开源贡献度自评</div>
+    <p>一个零依赖、可复现的治理协议实现 + 一段真实竞赛闭环证据 + 一份把"治理理念翻译成工程机制"的完整文档集。评审可直接 clone、跑测试、看账本、复现案例。</p>
+  </div>
+
+  <div class="foot">Switchback · 折返治理 —— GOAI 2026 Track 1 Agent Infra 初赛方案 · 作者 sukikeeling · 仓库 github.com/sukikeeling/switchback · Apache-2.0</div>
+</section>
+
+<!-- ================= 附录：评审对照 ================= -->
+<section class="page">
+  <div class="sec-title">附录：赛道 1 评审指标对照表</div>
+  <table>
+    <tr><th>评审维度</th><th>权重</th><th>本方案落点（可点击核实）</th></tr>
+    <tr><td>场景价值与行业可复制性</td><td>25%</td><td>一、三、九：京张 84 分真实闭环 + 四方向复制</td></tr>
+    <tr><td>多 Agent 协同与自主闭环能力</td><td>25%</td><td>四：AgentTeams 基点、6 Agent、闭环 8 步、上下文 3 项</td></tr>
+    <tr><td>Skill 工程体系与生态复用</td><td>25%</td><td>五：六大可执行 Skill + SkillSpec 机器声明</td></tr>
+    <tr><td>工程落地、运行验证与安全可审计</td><td>20%</td><td>七、八：可复现代码包、23 测试、K 标账本、风险台账、不设自动恢复</td></tr>
+    <tr><td>开放/开源贡献</td><td>5%</td><td>十：Apache-2.0 全量开源、依赖边界清晰</td></tr>
+  </table>
+
+  <h3>初赛必交内容核对</h3>
+  <table>
+    <tr><th>要求</th><th>本方案</th></tr>
+    <tr><td>作品简介 ≤500 字</td><td>competition/intro-500.md（项目名 ~20 字）</td></tr>
+    <tr><td>方案 PPT/PDF（场景/设计/Skill/可行性）</td><td>本 PDF 一至十章</td></tr>
+    <tr><td>Agent 分工 / 任务拆解 / 上下文传递</td><td>四、4.2 闭环 8 步</td></tr>
+    <tr><td>结果验证 / 异常分支 / 安全边界 / 风险控制</td><td>五、七（evidence-verify / 道岔 / 风险台账）</td></tr>
+    <tr><td>开放/开源计划</td><td>十</td></tr>
+    <tr><td>AgentTeams 设计基点 + Agent Identity 清单</td><td>四、docs/identity.md（附录A 对应）</td></tr>
+    <tr><td>可执行代码包（可选）</td><td>已交付：github.com/sukikeeling/switchback</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

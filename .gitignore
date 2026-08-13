@@ -1,0 +1,22 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime artifacts
+switchback-run/
+*.jsonl
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
