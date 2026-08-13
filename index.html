@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>折返治理 Switchback · 在线 Demo</title>
+<style>
+  :root{--rail:#123a5f;--rail2:#0c2c49;--green:#2f7d5a;--copper:#b0763c;--ink:#1c2733;--muted:#5a6b7a;--line:#dde4ea;--bg:#f6f8fa;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 20px 60px}
+  h1{color:var(--rail2);font-size:32px;margin-bottom:4px}
+  .en{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .slogan{color:var(--copper);font-size:18px;border-left:4px solid var(--copper);padding-left:12px;margin:16px 0 24px}
+  h2{color:var(--rail);font-size:20px;border-bottom:2px solid var(--rail);padding-bottom:6px;margin:32px 0 12px}
+  h3{color:var(--rail);font-size:15px;margin:20px 0 8px}
+  p{margin:8px 0}
+  .box{background:#fff;border:1px solid var(--line);border-left:4px solid var(--rail);border-radius:4px;padding:16px;margin:12px 0}
+  .box.green{border-left-color:var(--green)} .box.copper{border-left-color:var(--copper)}
+  pre{background:#0c2c49;color:#dbe8f4;padding:16px;border-radius:6px;font-family:Consolas,"Cascadia Code",monospace;font-size:13px;overflow-x:auto;line-height:1.6;white-space:pre-wrap}
+  .hl{color:#7ce7a8;font-weight:700} .dim{color:#7f95ab}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px;background:#fff}
+  th{background:var(--rail);color:#fff;text-align:left;padding:8px}
+  td{border:1px solid var(--line);padding:8px;font-family:Consolas,monospace}
+  tr:nth-child(even){background:var(--bg)}
+  .tag{display:inline-block;background:var(--green);color:#fff;font-size:12px;padding:2px 10px;border-radius:10px;margin:2px}
+  .repo-link{display:inline-block;background:var(--rail);color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin:12px 0;font-weight:600}
+  .repo-link:hover{background:var(--rail2)}
+  .footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+  code{background:#eef2f6;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:12px}
+  ul{margin:8px 0 8px 20px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>折返治理 · Switchback</h1>
+<div class="en">Switchback Governance — the Human-in-the-Loop Governance Layer for Multi-Agent Teams</div>
+<div class="slogan">让每一次 Agent 决策，都沿轨道可查、可停、可回头。</div>
+
+<div class="box copper">
+  <strong>这是什么？</strong> 一层多 Agent 协同的人机监理治理协议。以京张铁路青龙桥"人字形折返"为制度原型——列车遇陡坡必停、换向、以退为进；任何 Agent 决策同样必须"到站必停、三方复核、不设自动恢复"。
+  <br><br>
+  <strong>旗舰证据：</strong>京张 AI 创新带开源征集 <strong>84/100 最高纪录</strong>（open-city-ai/haidian），真实竞赛闭环，非对话 Demo。
+</div>
+
+<a class="repo-link" href="https://github.com/sukikeeling/switchback">📦 源码仓库 github.com/sukikeeling/switchback</a>
+
+<h2>① 一键复现命令</h2>
+<pre>$ git clone https://github.com/sukikeeling/switchback
+$ cd switchback && pip install -e ".[dev]"
+
+$ python -m switchback.cli replay jingzhang   <span class="dim"># 京张84分案例</span>
+$ python -m switchback.cli replay ops          <span class="dim"># 运维事故案例（跨行业复用）</span>
+$ python -m pytest                             <span class="dim"># 38项测试全绿</span></pre>
+
+<h2>② 旗舰案例：京张 84 分真实重放</h2>
+<p>下面是 <code>python -m switchback.cli replay jingzhang</code> 的真实输出——重放京张开源征集 16 个 PR 的真实评分历史，每次提交都过"证据核验 → 折返点三方复核 → K标放行/折返"：</p>
+<pre>== 京张 84 分案例重放（Switchback Governance in action）==
+
+<span class="hl">版本      PR        分    裁决            证据</span>
+-----------------------------------------------
+v5       PR#605    67    PASS            ✓
+v8       PR#1220   70    折返↩            ✓
+v8.1     PR#1468   84    PASS            ✓
+v8.2     PR#1816   70    折返↩            ✓
+v8.5     PR#2205   77    折返↩            ✓
+v8.10    PR#2328   76    折返↩            ✓
+
+<span class="dim">最高分：84（v8.1 PR#1468）→ 84 高水位保持
+教训：'加内容' 5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。</span></pre>
+<p>每次提交都过"证据核验 → 折返点复核 → K标放行/折返"，账本不可变、Trace 可回放。</p>
+
+<h2>③ 跨行业第二案例：运维事故自主闭环</h2>
+<p>同一套协议、同一套 Skill，零改代码治理生产事故（赛道参考方向一·零人工运维）：</p>
+<pre>== 运维事故自主闭环（Switchback Governance · 跨行业复用）==
+  事故 INC-2026-0813：支付服务 5xx 飙升
+
+<span class="hl">阶段                裁决            坡度      证据</span>
+----------------------------------------------
+alert-triage        PASS          medium   ✓
+fix-v1              折返↩           steep    ✓
+fix-v2              PASS          medium   ✓
+recovery-verify     PASS          medium   ✓
+postmortem          PASS          gentle   ✓
+
+<span class="dim">关键：fix-v1 因回滚风险被责任人一票否决→侧线折返；
+fix-v2 金丝雀方案三方通过放行。折返 1 次，放行 4 次，全程不设自动恢复。
+跨行业复用实证：同一套折返治理协议，从城市设计评审到生产事故运维。</span></pre>
+
+<h2>④ K标账本（不可变哈希链）</h2>
+<p>每次数据更新/复算/放行记入一个 K 标，SHA-256 内容寻址 + 哈希链串联，篡改即断链：</p>
+<table>
+<tr><th>K标</th><th>任务</th><th>标签</th><th>SHA-256</th><th>前链</th></tr>
+<tr><td>K0</td><td>jingzhang-v5</td><td>K0 admission</td><td>9a77533d10…</td><td>-</td></tr>
+<tr><td>K1</td><td>jingzhang-v5</td><td>K-release</td><td>d4b134ceb8…</td><td>9a77533d10</td></tr>
+<tr><td>K2</td><td>jingzhang-v8</td><td>K0 admission</td><td>f3cc5952c3…</td><td>d4b134ceb8</td></tr>
+<tr><td>K3</td><td>jingzhang-v8.1</td><td>K0 admission</td><td>bb3df51587…</td><td>f3cc5952c3</td></tr>
+<tr><td>K4</td><td>jingzhang-v8.1</td><td>K-release</td><td>4f30d8124f…</td><td>bb3df51587</td></tr>
+<tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+</table>
+<p>账本完整性校验：<code>python -m switchback.cli ledger</code> → chain integrity: OK</p>
+
+<h2>⑤ 四大机制</h2>
+<div class="box green">
+  <strong>① 折返点 Switchback Node</strong> — 任务到点必停，任何一方否决即强制折返，不自动续行<br>
+  <strong>② 坡度分级 Grade-based Access</strong> — 缓/中/陡三级，越陡复核越严（陡坡需三方）<br>
+  <strong>③ K标版本 K-marker</strong> — 内容寻址哈希链，永久留痕，篡改即断链<br>
+  <strong>④ 道岔三态 Switch States</strong> — 正线/侧线折返/入段检修，<strong>不设自动恢复</strong>
+</div>
+
+<h2>⑥ 六大可执行 Skill</h2>
+<table>
+<tr><th>Skill</th><th>功能</th></tr>
+<tr><td>grade-access</td><td>坡度分级准入</td></tr>
+<tr><td>evidence-verify</td><td>证据核验（数值三处对齐 + 引用双向 + 内容哈希）</td></tr>
+<tr><td>kmarker-ledger</td><td>K标账本（不可变哈希链）</td></tr>
+<tr><td>risk-ledger</td><td>风险台账（score≥4 强制人工复核）</td></tr>
+<tr><td>switch-decision</td><td>折返裁决（三方复核，任何否决即折返）</td></tr>
+<tr><td>lessons-learned</td><td>经验沉淀（复盘写回 Agent 记忆）</td></tr>
+</table>
+
+<h2>⑦ 工程证据</h2>
+<ul>
+  <li>Python 3.10+，<strong>零第三方运行依赖</strong></li>
+  <li><strong>38 项 pytest 全绿</strong>（含状态机边界、哈希链冲突、持久化往返）</li>
+  <li>GitHub Actions CI 覆盖 Python 3.10/3.11/3.12，全绿</li>
+  <li>Apache-2.0 全量开源</li>
+  <li>双案例（京张+运维）可一键复现，运行证据已入仓库 <code>examples/</code></li>
+</ul>
+
+<div class="footer">
+  Switchback · 折返治理 — GOAI 2026 Track 1 Agent Infra · sukikeeling ·
+  <a href="https://github.com/sukikeeling/switchback">github.com/sukikeeling/switchback</a> · Apache-2.0
+</div>
+
+</div>
+</body>
+</html>
