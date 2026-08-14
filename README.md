@@ -187,7 +187,7 @@ switchback/
 │   ├── cases/jingzhang.py    #   京张 84 分案例重放（城市设计评审）
 │   ├── cases/ops.py          #   运维事故自主闘环（零人工运维，跨行业复用）
 │   └── cli.py                #   CLI：init/register/verify/approve/reject/status/ledger/replay
-├── tests/                    # 23 项测试
+├── tests/                    # 43 项测试（协议/边界/技能/双案例/CLI 修复）
 ├── docs/                     # 协议/架构/Agent Identity/Skill/AgentTeams 映射
 ├── competition/              # GOAI 初赛材料（简介/方案 PDF/清单）
 └── DESIGN.md                 # 设计蓝图

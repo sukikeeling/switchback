@@ -1,5 +1,5 @@
 #!/bin/bash
-# Switchback 全系统验证器 —— 7 维度健康检查（借鉴 TRIO3.0-oss full-system-verify.sh）
+# Switchback 全系统验证器 —— 8 维度健康检查（借鉴 TRIO3.0-oss full-system-verify.sh）
 #
 # 设计目标：把 evidence-verify 从"返回 passed=False"升级为"阻断交付（exit 1）"。
 # 评审/CI 可直接跑此脚本判定仓库是否健康。任何一维失败 => exit 1。
@@ -15,7 +15,7 @@ pass(){ echo "  ✅ $1"; PASS=$((PASS+1)); }
 warn(){ echo "  ⚠️  $1"; WARN=$((WARN+1)); }
 fail(){ echo "  ❌ $1"; FAIL=$((FAIL+1)); }
 
-echo "═══ Switchback 全系统验证（7 维度）═══"
+echo "═══ Switchback 全系统验证（8 维度）═══"
 echo ""
 
 # ── 1. 代码质量 ───────────────────────────────────────────

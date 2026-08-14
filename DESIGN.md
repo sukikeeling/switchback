@@ -53,7 +53,7 @@
 | 交付物 | 状态 |
 |---|---|
 | 开源仓库 `sukikeeling/switchback`（核心协议 + 可运行 demo） | 本仓 |
-| 初赛方案 PDF（对照赛道 rubric 逐项） | competition/proposal.pdf |
+| 初赛方案 PDF（对照赛道 rubric 逐项） | competition/GOAI-初赛方案-折返治理Switchback.pdf |
 | 500 字作品简介 | competition/intro-500.md |
 | Agent Identity 清单 | docs/identity.md |
 | Skill 清单 | docs/skills.md |

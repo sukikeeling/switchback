@@ -389,17 +389,21 @@ postmortem          PASS          gentle   ✓
   <h3>8.3 命令行全流程（评审可直接运行）</h3>
   <pre>$ python -m switchback.cli init
 $ python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
-$ python -m switchback.cli verify  jz-001 --claims claims.json --sources sources.json
-$ python -m switchback.cli approve jz-001 --label release
+$ python -m switchback.cli verify  jz-001 --claims tests/fixtures/claims.json --sources tests/fixtures/sources.json
+$ python -m switchback.cli vote    jz-001 --role owner --name O --verdict pass
+$ python -m switchback.cli vote    jz-001 --role professional --name P --verdict pass
+$ python -m switchback.cli vote    jz-001 --role public --name U --verdict pass
+$ python -m switchback.cli seal    jz-001 --label release --payload '{"score":84}'
 $ python -m switchback.cli status  jz-001
 $ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链并校验完整性</span></pre>
 
-  <h3>8.4 测试证据（38 项）</h3>
+  <h3>8.4 测试证据（43 项，CI 三版本全绿）</h3>
   <ul>
     <li><code>test_protocol.py</code>（14）：折返裁决 / 一票否决 / 不设自动恢复 / 首次放行例外 / 账本篡改检测；</li>
-    <li><code>test_boundaries.py</code>（15）：<strong>状态机边界</strong>（侧线返工回正线 / 多轮折返累积 / 全 DEPOT 票 / 混合票优先级 / 被放行又入段禁止自动恢复）、<strong>哈希链冲突</strong>（空账本 / 篡改 payload / 伪造 sha256 / 断链 prev / 持久化往返一致）、<strong>任务卡持久化往返</strong>；</li>
+    <li><code>test_boundaries.py</code>（15）：<strong>状态机边界</strong>（侧线返工回正线 / 多轮折返累积 / 全 DEPOT 票 / 混合票优先级 / 被放行又入段禁止自动恢复）、<strong>哈希链冲突</strong>（空账本 / 篡改 payload / 伪造 sha256 / 断链 prev / 持久化往返一致）、<strong>任务卡持久化往返</strong>、<strong>运维案例重放断言</strong>（test_ops_case_replay）；</li>
     <li><code>test_skills.py</code>（8）：六 Skill 输入输出与组合；</li>
-    <li><code>test_jingzhang_case.py</code> + <code>test_ops_case</code>：两案例重放断言真实裁决结果。</li>
+    <li><code>test_jingzhang_case.py</code>（1）：京张 84 分案例重放断言；</li>
+    <li><code>test_cli_audit_fixes.py</code>（5）：CLI 审查修复回归（vote/seal 注册、verify 顺序、公共 API 导出、端到端幸福路径）。</li>
   </ul>
 </section>
 
@@ -410,7 +414,7 @@ $ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链�
   <h3>9.1 落地路线</h3>
   <table>
     <tr><th>阶段</th><th>内容</th><th>证据</th></tr>
-    <tr><td>已实现</td><td>折返治理协议 + 六 Skill + 双案例（京张/运维）+ 可观测</td><td>38 项测试（含状态机边界/哈希链冲突）/ CI 全绿 / 双案例复现输出</td></tr>
+    <tr><td>已实现</td><td>折返治理协议 + 六 Skill + 双案例（京张/运维）+ 可观测</td><td>43 项测试（含状态机边界/哈希链冲突）/ CI 三版本全绿 / 双案例复现输出</td></tr>
     <tr><td>初赛→复赛（9.3）</td><td>AgentTeams 集群实际部署（Docker + Matrix 房间 + Higress）、Demo 视频</td><td>可执行代码包 → 运行 Demo</td></tr>
     <tr><td>复赛→决赛（9.22）</td><td>评测报告、生态 Skill 分发、第三案例（客服/研发）</td><td>现场 Demo + 审计链路展示</td></tr>
   </table>
@@ -455,7 +459,7 @@ $ python -m switchback.cli ledger    <span class="dim"># 输出 K 标哈希链�
     <tr><td>场景价值与行业可复制性</td><td>25%</td><td>一、三、九：京张 84 分真实闭环 + 四方向复制</td></tr>
     <tr><td>多 Agent 协同与自主闭环能力</td><td>25%</td><td>四：AgentTeams 基点、6 Agent、闭环 8 步、上下文 3 项</td></tr>
     <tr><td>Skill 工程体系与生态复用</td><td>25%</td><td>五：六大可执行 Skill + SkillSpec 机器声明</td></tr>
-    <tr><td>工程落地、运行验证与安全可审计</td><td>20%</td><td>七、八：可复现代码包、23 测试、K 标账本、风险台账、不设自动恢复</td></tr>
+    <tr><td>工程落地、运行验证与安全可审计</td><td>20%</td><td>七、八：可复现代码包、43 测试、K 标账本、风险台账、不设自动恢复</td></tr>
     <tr><td>开放/开源贡献</td><td>5%</td><td>十：Apache-2.0 全量开源、依赖边界清晰</td></tr>
   </table>
 

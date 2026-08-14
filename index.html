@@ -52,7 +52,7 @@ $ cd switchback && pip install -e ".[dev]"
 
 $ python -m switchback.cli replay jingzhang   <span class="dim"># 京张84分案例</span>
 $ python -m switchback.cli replay ops          <span class="dim"># 运维事故案例（跨行业复用）</span>
-$ python -m pytest                             <span class="dim"># 38项测试全绿</span></pre>
+$ python -m pytest                             <span class="dim"># 43 项测试全绿</span></pre>
 
 <h2>② 旗舰案例：京张 84 分真实重放</h2>
 <p>下面是 <code>python -m switchback.cli replay jingzhang</code> 的真实输出——重放京张开源征集 16 个 PR 的真实评分历史，每次提交都过"证据核验 → 折返点三方复核 → K标放行/折返"：</p>
@@ -123,7 +123,7 @@ fix-v2 金丝雀方案三方通过放行。折返 1 次，放行 4 次，全程�
 <h2>⑦ 工程证据</h2>
 <ul>
   <li>Python 3.10+，<strong>零第三方运行依赖</strong></li>
-  <li><strong>38 项 pytest 全绿</strong>（含状态机边界、哈希链冲突、持久化往返）</li>
+  <li><strong>43 项 pytest 全绿</strong>（含状态机边界、哈希链冲突、持久化往返）</li>
   <li>GitHub Actions CI 覆盖 Python 3.10/3.11/3.12，全绿</li>
   <li>Apache-2.0 全量开源</li>
   <li>双案例（京张+运维）可一键复现，运行证据已入仓库 <code>examples/</code></li>
