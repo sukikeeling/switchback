@@ -29,7 +29,6 @@
   .footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
   code{background:#eef2f6;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:12px}
   ul{margin:8px 0 8px 20px} li{margin:4px 0}
-</style>
   /* ── 交互模拟器 ── */
   .sim{border:2px solid var(--rail);border-radius:8px;padding:18px;margin:16px 0;background:#fff}
   .sim h3{color:var(--rail2);margin-top:0}
@@ -52,6 +51,8 @@
   .sim-log .ok{color:#7ce7a8}.sim-log .no{color:#ff9d8a}.sim-log .dim{color:#7f95ab}
   .sim table{font-size:12px;margin-top:6px}
   .sim .sha{font-family:Consolas,monospace;font-size:11px;color:var(--muted)}
+</style>
+
 
 </head>
 <body>
@@ -224,7 +225,10 @@ fix-v2 金丝雀方案三方通过放行。折返 1 次，放行 4 次，全程�
   }
 
   function log(txt, cls) {
-    logEl.innerHTML = '<span class="' + (cls || "") + '">' + txt + "</span>\n" + logEl.innerHTML;
+    var line = '<span class="' + (cls || "") + '">' + txt + "</span>\n";
+    logEl.innerHTML = line + logEl.innerHTML;
+    var cap = logEl.innerHTML.split("\n");
+    if (cap.length > 31) { logEl.innerHTML = cap.slice(0, 31).join("\n"); }
   }
 
   function setState(st) {
