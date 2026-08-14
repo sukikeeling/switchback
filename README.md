@@ -77,14 +77,21 @@ pip install -e ".[dev]"
 # 一键复现京张 84 分真实案例（输出转写 + K标账本 + 可观测 trace）
 python -m switchback.cli replay jingzhang
 
-# 一键复现运维事故自主闭环（跨行业第二案例）
+# --live 模式：用 GitHub API 验证 6 个 PR 真实存在（非剧本）
+python -m switchback.cli replay jingzhang --live
+
+# 一键复现运维事故自主闘环（跨行业第二案例）
 python -m switchback.cli replay ops
+
+# 全系统验证门禁（8 维度，会 exit 1 阻断）
+bash scripts/full-system-verify.sh
 
 # 或从命令行驱动整条治理管线（同义命令 `switchback …` 已注册 console script）
 python -m switchback.cli init
 python -m switchback.cli register jz-001 --title "京张方案 v8.1" --grade steep
 python -m switchback.cli verify  jz-001 --claims tests/fixtures/claims.json --sources tests/fixtures/sources.json
-python -m switchback.cli approve jz-001 --label release
+python -m switchback.cli vote    jz-001 --role owner --name O --verdict pass
+python -m switchback.cli seal    jz-001 --label release --payload '{"score":84}'
 python -m switchback.cli status  jz-001
 python -m switchback.cli ledger
 ```
@@ -92,7 +99,8 @@ python -m switchback.cli ledger
 运行测试：
 
 ```bash
-python -m pytest            # 38 项测试全绿：协议/治理/账本/技能/案例/状态机边界/哈希链冲突/持久化
+python -m pytest            # 43 项测试全绿：协议/治理/账本/技能/案例/CLI审查修复
+bash scripts/full-system-verify.sh  # 8 维度交付门禁（借签 TRIO，会 exit 1 阻断）
 ```
 
 ---

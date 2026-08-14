@@ -284,6 +284,11 @@
   </table>
   <p><strong>迁移成本判断</strong>：Skill 与协议解耦、契约即 JSON，未来迁 MCP 只需协议适配，无需重设计工具调用链。</p>
 
+  <div class="box green">
+    <div class="box-title">已交付：.mcp.json 真实 MCP 配置（非文档声称）</div>
+    <p>仓库根 <code>.mcp.json</code> 配置三个 MCP server：<code>filesystem</code>（工作区安全访问，对应 AgentTeams MinIO 共享存储）、<code>memory</code>（AgentMemory 跨 Agent 共享检索）、<code>github</code>（拉 PR/CI/check-run，凭证透传）。Skill→MCP 迁移契约见 <code>docs/mcp-integration.md</code>。</p>
+  </div>
+
   <h3>6.2 可观测（推荐项）</h3>
   <ul>
     <li><strong>Trace/Log/Metrics 三类全覆盖</strong>：<code>Tracer</code> 输出 OTel 形状 JSONL（SPAN_START/SPAN_END/LOG）+ 指标计数器，满足"建议遵循 OpenTelemetry GenAI 标准"；</li>
@@ -322,7 +327,12 @@
 
   <div class="box">
     <div class="box-title">可执行代码包（初赛可选 · 本项目已交付）</div>
-    <p><strong>github.com/sukikeeling/switchback</strong>：Python 3.10+，<strong>零第三方运行依赖</strong>，<code>pip install -e .</code> 即跑；38 项 pytest 全绿（含状态机边界、哈希链冲突、持久化往返）；GitHub Actions CI 覆盖 Python 3.10/3.11/3.12。</p>
+    <p><strong>github.com/sukikeeling/switchback</strong>：Python 3.10+，<strong>零第三方运行依赖</strong>，<code>pip install -e .</code> 即跑；<strong>43 项 pytest 全绿</strong>（含状态机边界、哈希链冲突、持久化往返、CLI 审查修复）；GitHub Actions CI 覆盖 Python 3.10/3.11/3.12。</p>
+  </div>
+
+  <div class="box green">
+    <div class="box-title">交付门禁（借签 TRIO3.0-oss）：8 维度全系统验证</div>
+    <p><code>bash scripts/full-system-verify.sh</code> —— 代码质量 / 协议不变量 / 安全熔断 / K标账本 / Skill 声明 / CLI 幸福路径 / 案例可复现 / 诚实局限声明，任一失败 <strong>exit 1 阻断交付</strong>。把 evidence-verify 从"返回 False"升级为"阻断交付"。</p>
   </div>
 
   <h3>8.1 一键复现旗舰案例（真实输出）</h3>
@@ -342,6 +352,20 @@ v8.10    PR#2328   76    折返↩            ✓
 <span class="dim">最高分：84（v8.1 PR#1468）→ 84 高水位保持
 教训：'加内容' 5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。</span></pre>
   <p>每次提交都过"证据核验 → 折返点复核 → K 标放行/折返"，账本不可变、Trace 可回放。<span class="tag green">真实任务闭环</span><span class="tag green">结果校验</span><span class="tag green">安全熔断审计</span></p>
+
+  <div class="box copper">
+    <div class="box-title">--live 模式：GitHub API 验证 PR 真实存在（非剧本）</div>
+    <pre>$ python -m switchback.cli replay jingzhang --live
+{
+  "repo": "open-city-ai/haidian",
+  "checked": [
+    {"version":"v5","pr":605,"exists":true,"merged":true,"title":"提交方案 v5：结构化证据层升级"},
+    {"version":"v8.1","pr":1468,"exists":true,"merged":true,"title":"提交方案 v8.1：…P0 修复"},
+    ...
+  ]
+}</pre>
+    <p>6 个 PR 全部经 GitHub API 验证为真实存在，标题/合并状态/分数对得上——剧本不再是"写死的"，是"经 API 验证的真实记录"。</p>
+  </div>
 
   <h3>8.2 跨行业第二案例：运维事故自主闭环（已实现，非承诺）</h3>
   <pre>$ python -m switchback.cli replay ops
