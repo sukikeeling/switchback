@@ -137,7 +137,7 @@ Skill 是赛道 25% 权重的评审轴。六个 Skill 全部以可执行 Python 
 | `switch-decision` | 折返裁决：三方复核，任何否决即折返 | 票数不足 → 拒绝裁决 |
 | `lessons-learned` | 经验沉淀：复盘写回 Agent 记忆 | 失败不阻断主线 |
 
-详见 [docs/skills.md](docs/skills.md)。这些 Skill 可作为**可复用 Skill 资产**沉淀进 AgentTeams 生态（Skill 门户 / 自托管）。
+六个 Skill 全部具备标准 SKILL.md 包（`docs/skills/<name>/SKILL.md`，frontmatter + 九要素），详见 [docs/skills.md](docs/skills.md)。这些 Skill 可作为**可复用 Skill 资产**沉淀进 AgentTeams 生态（Skill 门户 / 自托管）。
 
 ---
 
