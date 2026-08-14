@@ -75,6 +75,12 @@ def cmd_register(args: argparse.Namespace) -> int:
 def cmd_verify(args: argparse.Namespace) -> int:
     from .skills import evidence_verify
     gov = _gov(_workspace())
+    # 先校验 task 已注册，再跑证据核验——避免"先打 JSON 后抛 unknown task"的顺序 bug
+    try:
+        gov.status(args.task)
+    except Exception:
+        print(f"error: unknown task '{args.task}' — run `register {args.task}` first", file=sys.stderr)
+        return 2
     claims = json.loads(Path(args.claims).read_text(encoding="utf-8"))
     sources = json.loads(Path(args.sources).read_text(encoding="utf-8"))
     report = evidence_verify(claims, sources, numeric_keys=args.numeric_keys)
@@ -83,6 +89,38 @@ def cmd_verify(args: argparse.Namespace) -> int:
         gov.turn_back(args.task, actor="verifier", reason="evidence-verify failed")
         print(f"task {args.task} -> SIDING (turned back, not auto-resumed)")
         return 1
+    return 0
+
+
+def cmd_vote(args: argparse.Namespace) -> int:
+    """Cast a single party vote on the current approval checkpoint."""
+    gov = _gov(_workspace())
+    gov.status(args.task)  # 先校验 task 存在，不存在会抛异常
+    cp = gov.open_checkpoint(args.task, CheckpointKind.APPROVAL)
+    role = PartyRole(args.role)
+    verdict = Verdict(args.verdict)
+    gov.vote(cp, role, args.name, verdict, note=args.note or "")
+    if len(cp.votes) == len(cp.required_roles):
+        v = cp.resolve()
+        print(f"checkpoint {cp.id}: {v.value}")
+        if v == Verdict.TURN_BACK:
+            gov.turn_back(args.task, actor="governor", reason=f"{role.value} veto")
+            print(f"task {args.task} -> SIDING (no auto-resume)")
+        elif v == Verdict.DEPOT:
+            gov.pull_into_depot(args.task, actor="governor", reason=f"{role.value} depot")
+            print(f"task {args.task} -> DEPOT (no auto-resume)")
+    else:
+        print(f"vote recorded ({len(cp.votes)}/{len(cp.required_roles)}); awaiting more votes")
+    return 0
+
+
+def cmd_seal(args: argparse.Namespace) -> int:
+    """Seal a K-marker into the immutable ledger."""
+    gov = _gov(_workspace())
+    gov.status(args.task)
+    payload = json.loads(args.payload) if args.payload else {}
+    marker = gov.seal(args.task, args.label, payload)
+    print(f"sealed: K{marker.km} {args.label} | sha256={marker.sha256[:16]}…")
     return 0
 
 
@@ -134,7 +172,11 @@ def cmd_ledger(args: argparse.Namespace) -> int:
 
 def cmd_replay(args: argparse.Namespace) -> int:
     if args.case == "jingzhang":
-        from .cases.jingzhang import run_jingzhang_case
+        from .cases.jingzhang import run_jingzhang_case, verify_live
+        if getattr(args, "live", False):
+            report = verify_live()
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return 0
         run_jingzhang_case(ws=_workspace(), headless=False)
         return 0
     if args.case == "ops":
@@ -171,6 +213,18 @@ def main(argv: list[str] | None = None) -> int:
     j.add_argument("task")
     j.add_argument("--reason")
 
+    vote = sub.add_parser("vote", help="cast a single party vote at approval checkpoint")
+    vote.add_argument("task")
+    vote.add_argument("--role", choices=["owner", "professional", "public"], required=True)
+    vote.add_argument("--name", required=True)
+    vote.add_argument("--verdict", choices=["pass", "turn_back", "depot"], required=True)
+    vote.add_argument("--note", default="")
+
+    seal = sub.add_parser("seal", help="seal a K-marker into the ledger")
+    seal.add_argument("task")
+    seal.add_argument("--label", default="release")
+    seal.add_argument("--payload", default=None, help="JSON string payload")
+
     s = sub.add_parser("status", help="show task card")
     s.add_argument("task")
 
@@ -178,10 +232,13 @@ def main(argv: list[str] | None = None) -> int:
 
     rep = sub.add_parser("replay", help="replay a built-in case")
     rep.add_argument("case", choices=["jingzhang", "ops"])
+    rep.add_argument("--live", action="store_true",
+                     help="jingzhang: verify PRs exist via GitHub API (real, not scripted)")
 
     args = p.parse_args(argv)
     return {"init": cmd_init, "register": cmd_register, "verify": cmd_verify,
-            "approve": cmd_approve, "reject": cmd_reject, "status": cmd_status,
+            "vote": cmd_vote, "approve": cmd_approve, "reject": cmd_reject,
+            "seal": cmd_seal, "status": cmd_status,
             "ledger": cmd_ledger, "replay": cmd_replay}[args.cmd](args)
 
 

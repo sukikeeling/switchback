@@ -1,0 +1,56 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2026.7.10",
+        "${SWITCHBACK_WORKSPACE:-./switchback-run}"
+      ],
+      "note": "让 Worker Agent 经 MCP 安全访问工作区（账本/任务卡/trace），不直接持有文件系统权限——对应 AgentTeams 凭证透传模型"
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory@2026.7.4"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${SWITCHBACK_WORKSPACE:-./switchback-run}/mcp-memory.json"
+      },
+      "note": "AgentMemory 的 MCP 暴露：让 lessons-learned Skill 写回的记忆可跨 Agent 共享与检索"
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@2025.4.0"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "note": "京张 --live 模式与运行证据采集经此 MCP 拉取 PR/CI/check-run；Worker 只持消费者令牌，真实 PAT 存于 Higress 网关"
+    }
+  },
+  "switchback_skills_via_mcp": {
+    "note": "六大 Skill 的迁移契约：当前为本地 Python 函数，迁 MCP 时只需协议适配（JSON 契约不变），不重设计工具调用链",
+    "evidence-verify": {
+      "transport": "stdio",
+      "input_schema": "claims(dict) + sources(dict) + numeric_keys(list)",
+      "output_schema": "VerificationReport{passed(bool), checks(list)}",
+      "migration": "包成 MCP server tool，签名不变"
+    },
+    "grade-access": {
+      "transport": "stdio",
+      "input_schema": "task_payload(dict) + trust_score(float)",
+      "output_schema": "Grade(enum: gentle/medium/steep)",
+      "migration": "同上"
+    },
+    "kmarker-ledger": {
+      "transport": "stdio",
+      "input_schema": "task_id + label + payload(dict)",
+      "output_schema": "KMarker{km, sha256, prev_sha}",
+      "migration": "账本状态存于文件系统 MCP，seal 操作包成 MCP tool"
+    }
+  }
+}

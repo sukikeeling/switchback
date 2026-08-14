@@ -180,3 +180,47 @@ def _print_transcript(results: list[dict]) -> None:
     best = max(results, key=lambda r: r["score"])
     print(f"\n最高分：{best['score']}（{best['version']} {best['pr']}）→ 84 高水位保持")
     print("教训：'加内容'5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。\n")
+
+
+# --------------------------------------------------------------------------- #
+# --live 模式：用 GitHub API 验证 PR 真实存在 + 拉评审分数
+# 解决审查报告 C 项："京张 replay 是写死剧本不验真实 PR/CI"
+# --------------------------------------------------------------------------- #
+
+REPO = "open-city-ai/haidian"
+
+
+def verify_live() -> dict:
+    """用 GitHub API 验证 VERSIONS 里的 PR 编号真实存在，并尝试拉评审分数。
+
+    不修改剧本重放逻辑——只做"剧本 vs 真实"的一致性核验。若网络不可达
+    或 API 限流，graceful 降级并如实报告。
+    """
+    import urllib.request
+    import urllib.error
+
+    report: dict = {"repo": REPO, "checked": [], "unreachable": False}
+    for ver, pr_label, score, *_ in VERSIONS:
+        pr_num = int(pr_label.replace("PR#", ""))
+        entry = {"version": ver, "pr": pr_num, "claimed_score": score}
+        url = f"https://api.github.com/repos/{REPO}/pulls/{pr_num}"
+        req = urllib.request.Request(url, headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "switchback-verify-live",
+        })
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read())
+            entry["exists"] = True
+            entry["state"] = data.get("state")  # open/closed/merged
+            entry["merged"] = data.get("merged_at") is not None
+            entry["title"] = (data.get("title") or "")[:60]
+        except urllib.error.HTTPError as e:
+            entry["exists"] = False
+            entry["error"] = f"HTTP {e.code}"
+        except Exception as e:
+            entry["exists"] = False
+            entry["error"] = type(e).__name__
+            report["unreachable"] = True
+        report["checked"].append(entry)
+    return report

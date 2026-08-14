@@ -27,10 +27,16 @@ __all__ = [
     "Verdict",
     "PartyRole",
     "CheckpointKind",
+    "Checkpoint",
+    "KMarker",
     "SwitchbackError",
     "GradeAccessError",
     "NoAutoResumeError",
     "LedgerIntegrityError",
+    "SwitchbackGovernor",
+    "KMarkerLedger",
+    "RiskLedger",
+    "Tracer",
 ]
 
 from .protocol import (
@@ -39,8 +45,13 @@ from .protocol import (
     Verdict,
     PartyRole,
     CheckpointKind,
+    Checkpoint,
+    KMarker,
     SwitchbackError,
     GradeAccessError,
     NoAutoResumeError,
     LedgerIntegrityError,
 )
+from .governor import SwitchbackGovernor
+from .ledger import KMarkerLedger, RiskLedger
+from .trace import Tracer
