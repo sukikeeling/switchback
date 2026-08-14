@@ -200,6 +200,20 @@ switchback/
 - **数据与权利**：京张案例数据来自公开的开源竞赛仓库（open-city-ai/haidian），demo 不包含任何非公开或受限数据
 - **安全**：凭证透传设计（Worker 不持真实 Key）；见 [SECURITY.md](SECURITY.md)
 
+## 路线图（ROADMAP）
+
+| 里程碑 | 状态 | 内容 |
+|---|---|---|
+| M0 协议核心 | ✅ 已交付 | 折返点 / 坡度分级 / K 标账本 / 道岔三态，43 项测试 CI 三版本全绿 |
+| M1 双案例实证 | ✅ 已交付 | 京张 84 分真实重放 + 运维事故闭环，`--live` 模式经 GitHub API 验证 PR 真实存在 |
+| M2 标准 Skill 包 | ✅ 已交付 | 六 Skill 全部具备 `docs/skills/<name>/SKILL.md`（frontmatter + 九要素） |
+| M3 在线交互 Demo | ✅ 已交付 | GitHub Pages 含折返点模拟器（可点按验证裁决逻辑与 K 标哈希链） |
+| M4 AgentTeams 集群部署 | 🔜 复赛（9.3 前） | Docker + Matrix 房间 + Higress 网关，可执行 AgentTeams 代码包 |
+| M5 评测与生态分发 | 🔜 复赛→决赛 | 基于观测数据的评估报告、Skill 沉淀进 AgentTeams Skill 门户 |
+| M6 第三案例 | 🔜 决赛前 | 智能客服或软件研发场景（协议零改动迁移验证） |
+
+> 里程碑演进原则与协议一致：**不设自动恢复**——每个里程碑完成都经"证据核验 → 折返点复核 → K 标放行"，不做未经复核的自动推进。
+
 ## 相关文档
 
 | 文档 | 内容 |

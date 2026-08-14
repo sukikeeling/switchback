@@ -30,6 +30,29 @@
   code{background:#eef2f6;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:12px}
   ul{margin:8px 0 8px 20px} li{margin:4px 0}
 </style>
+  /* ── 交互模拟器 ── */
+  .sim{border:2px solid var(--rail);border-radius:8px;padding:18px;margin:16px 0;background:#fff}
+  .sim h3{color:var(--rail2);margin-top:0}
+  .sim-row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;align-items:center}
+  .sim .lbl{font-weight:600;color:var(--rail);min-width:70px;font-size:13px}
+  .sim button{border:1px solid var(--rail);background:#fff;color:var(--rail);padding:7px 14px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600}
+  .sim button:hover{background:var(--rail);color:#fff}
+  .sim button.on{background:var(--rail);color:#fff}
+  .sim button:disabled{opacity:.35;cursor:not-allowed}
+  .sim button.veto{border-color:var(--warn,#a83a2c);color:var(--warn,#a83a2c)}
+  .sim button.veto:hover{background:var(--warn,#a83a2c);color:#fff}
+  .sim button.depot{border-color:var(--copper);color:var(--copper)}
+  .sim button.depot:hover{background:var(--copper);color:#fff}
+  .sim-state{display:flex;gap:8px;margin:12px 0}
+  .sim-state .st{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--muted);background:var(--bg)}
+  .sim-state .st b{display:block;font-size:13px;color:var(--rail2)}
+  .sim-state .st.cur{border-color:var(--green);background:#eef5f0;color:var(--green);font-weight:700}
+  .sim-state .st.cur b{color:var(--green)}
+  .sim-log{background:#0c2c49;color:#dbe8f4;border-radius:6px;padding:12px;font-family:Consolas,monospace;font-size:12px;max-height:190px;overflow:auto;line-height:1.7;white-space:pre-wrap}
+  .sim-log .ok{color:#7ce7a8}.sim-log .no{color:#ff9d8a}.sim-log .dim{color:#7f95ab}
+  .sim table{font-size:12px;margin-top:6px}
+  .sim .sha{font-family:Consolas,monospace;font-size:11px;color:var(--muted)}
+
 </head>
 <body>
 <div class="wrap">
@@ -129,11 +152,161 @@ fix-v2 金丝雀方案三方通过放行。折返 1 次，放行 4 次，全程�
   <li>双案例（京张+运维）可一键复现，运行证据已入仓库 <code>examples/</code></li>
 </ul>
 
+
+<h2>⑧ 交互演示：折返点模拟器（可点按验证协议）</h2>
+<p>下面不是截图，是一段<strong>可运行的折返治理协议模拟器</strong>——按京张案例真实裁决逻辑实现（坡度→投票→裁决→状态机→K 标哈希链，任何否决即折返，不设自动恢复）。点按试试：</p>
+<div class="sim">
+  <h3>Switchback Node · 折返点模拟</h3>
+  <div class="sim-row">
+    <span class="lbl">坡度</span>
+    <button data-grade="gentle" class="on">缓坡 gentle</button>
+    <button data-grade="medium">中坡 medium</button>
+    <button data-grade="steep">陡坡 steep</button>
+    <span class="lbl" style="margin-left:14px">当前任务</span>
+    <code>demo-task-001</code>
+  </div>
+  <div class="sim-row" id="voteRow">
+    <span class="lbl">复核投票</span>
+  </div>
+  <div class="sim-row">
+    <span class="lbl">动作</span>
+    <button id="btnResolve">裁决（票齐时生效）</button>
+    <button id="btnDepot" disabled>拉入检修 DEPOT</button>
+    <button id="btnAuto" disabled>尝试自动回正线（不设自动恢复）</button>
+    <button id="btnReset">重置</button>
+  </div>
+  <div class="sim-state" id="stateBox">
+    <div class="st" data-st="DEPOT"><b>入段检修</b>DEPOT</div>
+    <div class="st" data-st="SIDING"><b>侧线折返</b>SIDING</div>
+    <div class="st" data-st="MAINLINE"><b>正线运行</b>MAINLINE</div>
+  </div>
+  <div class="sim-log" id="simLog"><span class="dim"># 初始化：demo-task-001 @ DEPOT，等待首次准入投票（缓坡：1 票 = 责任人）</span></div>
+  <table>
+    <tr><th>K 标</th><th>标签</th><th>SHA-256</th><th>前链</th></tr>
+    <tbody id="kTable"></tbody>
+  </table>
+</div>
 <div class="footer">
   Switchback · 折返治理 — GOAI 2026 Track 1 Agent Infra · sukikeeling ·
   <a href="https://github.com/sukikeeling/switchback">github.com/sukikeeling/switchback</a> · Apache-2.0
 </div>
 
 </div>
+
+<script>
+(function () {
+  "use strict";
+  var REQUIRED = { gentle: ["owner"], medium: ["owner", "professional"], steep: ["owner", "professional", "public"] };
+  var ROLES = { owner: "责任人", professional: "专业复核", public: "公众代表" };
+  var state = { grade: "gentle", votes: {}, taskState: "DEPOT", km: 0, chain: [], prevSha: "" };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var gradeBtns = Array.prototype.slice.call(document.querySelectorAll("[data-grade]"));
+  var logEl = $("simLog"), kBody = $("kTable"), voteRow = $("voteRow");
+
+  function sha256hex(str) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+    });
+  }
+
+  function renderVotes() {
+    var req = REQUIRED[state.grade], html = "";
+    req.forEach(function (role) {
+      var v = state.votes[role];
+      html += '<span class="lbl">' + ROLES[role] + '</span>' +
+        '<button data-vote="' + role + '" data-v="pass"' + (v === "pass" ? ' class="on"' : "") + '>通过</button>' +
+        '<button data-vote="' + role + '" data-v="turn"' + (v === "turn" ? ' class="on veto"' : "") + '>否决</button>' +
+        '<button data-vote="' + role + '" data-v="depot"' + (v === "depot" ? ' class="on depot"' : "") + '>入段</button>&nbsp;&nbsp;';
+    });
+    voteRow.innerHTML = html;
+    gradeBtns.forEach(function (b) { b.classList.toggle("on", b.dataset.grade === state.grade); });
+  }
+
+  function log(txt, cls) {
+    logEl.innerHTML = '<span class="' + (cls || "") + '">' + txt + "</span>\n" + logEl.innerHTML;
+  }
+
+  function setState(st) {
+    state.taskState = st;
+    var box = $("stateBox");
+    box.querySelectorAll(".st").forEach(function (el) { el.classList.toggle("cur", el.dataset.st === st); });
+    $("btnDepot").disabled = st !== "MAINLINE";
+    $("btnAuto").disabled = st !== "DEPOT" || !state.passedOnce;
+  }
+
+  function seal(label, payload) {
+    var km = state.km++;
+    var raw = km + "|demo-task-001|" + label + "|" + JSON.stringify(payload) + "|" + state.prevSha;
+    return sha256hex(raw).then(function (sha) {
+      state.chain.push({ km: km, label: label, sha: sha, prev: state.prevSha });
+      state.prevSha = sha;
+      var row = "<tr><td>K" + km + "</td><td>" + label + "</td><td class='sha'>" + sha.slice(0, 16) + "…</td><td class='sha'>" + (state.prevSha ? state.prevSha.slice(0, 10) + "…" : "-") + "</td></tr>";
+      kBody.insertAdjacentHTML("beforeend", row);
+      return sha;
+    });
+  }
+
+  function reset() {
+    state.votes = {}; state.taskState = "DEPOT"; state.passedOnce = false; state.km = 0; state.chain = []; state.prevSha = "";
+    logEl.innerHTML = '<span class="dim"># 重置：demo-task-001 @ DEPOT（' + ROLES[REQUIRED[state.grade][0]] + ' 1 票即可准入）</span>';
+    kBody.innerHTML = "";
+    renderVotes(); setState("DEPOT");
+    seal("K0 admission", { grade: state.grade });
+  }
+
+  voteRow.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-vote]");
+    if (!b) return;
+    var role = b.dataset.vote, v = b.dataset.v;
+    if (state.votes[role] === v) { delete state.votes[role]; log("↩ " + ROLES[role] + " 撤回投票", "dim"); }
+    else {
+      state.votes[role] = v;
+      var word = v === "pass" ? "通过" : (v === "turn" ? "否决（折返）" : "否决（入段）");
+      log("🗳 " + ROLES[role] + " 投：" + word);
+    }
+    renderVotes();
+  });
+
+  gradeBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.grade = b.dataset.grade; state.votes = {};
+      log("🚧 坡度改为 " + state.grade + "（需 " + REQUIRED[state.grade].map(function (r) { return ROLES[r]; }).join(" + ") + " 复核）", "dim");
+      renderVotes();
+    });
+  });
+
+  $("btnResolve").addEventListener("click", function () {
+    var req = REQUIRED[state.grade];
+    var missing = req.filter(function (r) { return !state.votes[r]; });
+    if (missing.length) { log("✋ 票未齐（缺 " + missing.map(function (r) { return ROLES[r]; }).join("、") + "）→ 拒绝裁决", "no"); return; }
+    var anyVeto = req.some(function (r) { return state.votes[r] === "turn"; });
+    var anyDepot = req.some(function (r) { return state.votes[r] === "depot"; });
+    if (anyDepot) { log("⛔ 存在入段票 → 裁决 DEPOT 入段检修", "no"); setState("DEPOT"); seal("K-deny-depot", { verdict: "depot" }); }
+    else if (anyVeto) { log("⛔ 存在否决票 → 强制折返 SIDING（任何否决即折返）", "no"); setState("SIDING"); seal("K-turnback", { verdict: "turn_back" }); }
+    else {
+      log("✅ 三方（" + req.map(function (r) { return ROLES[r]; }).join("+") + "）通过 → 放行 MAINLINE", "ok");
+      state.passedOnce = true; setState("MAINLINE");
+      seal("K-release", { verdict: "pass", score: 84 });
+    }
+    state.votes = {}; renderVotes();
+  });
+
+  $("btnDepot").addEventListener("click", function () {
+    log("⚠️ 人工拉入检修 DEPOT（状态漂移风险隔离）", "no");
+    setState("DEPOT");
+    seal("K-depot", { reason: "manual safety pull" });
+  });
+
+  $("btnAuto").addEventListener("click", function () {
+    log("🚫 NoAutoResumeError：检修态禁止自动回正线，必须经折返点重新复核", "no");
+  });
+
+  $("btnReset").addEventListener("click", reset);
+
+  reset();
+})();
+</script>
+
 </body>
 </html>
