@@ -78,20 +78,25 @@ $ python -m switchback.cli replay jingzhang   <span class="dim"># 京张84分案
 $ python -m switchback.cli replay ops          <span class="dim"># 运维事故案例（跨行业复用）</span>
 $ python -m pytest                             <span class="dim"># 43 项测试全绿</span></pre>
 
-<h2>② 旗舰案例：京张 84 分真实重放</h2>
-<p>下面是 <code>python -m switchback.cli replay jingzhang</code> 的真实输出——重放京张开源征集 16 个 PR 的真实评分历史，每次提交都过"证据核验 → 折返点三方复核 → K标放行/折返"：</p>
+<h2>② 旗舰案例：京张 84 分真实重放（已演进至 v10 里程碑）</h2>
+<p>下面是 <code>python -m switchback.cli replay jingzhang</code> 的真实输出——重放京张开源征集 16+ 个 PR 的真实评分历史，每次提交都过"证据核验 → 折返点三方复核 → K标放行/折返"：</p>
 <pre>== 京张 84 分案例重放（Switchback Governance in action）==
 
 <span class="hl">版本      PR        分    裁决            证据</span>
 -----------------------------------------------
 v5       PR#605    67    PASS            ✓
 v8       PR#1220   70    折返↩            ✓
-v8.1     PR#1468   84    PASS            ✓
+v8.1     PR#1468   84    PASS            ✓  [高水位基座锁定]
 v8.2     PR#1816   70    折返↩            ✓
 v8.5     PR#2205   77    折返↩            ✓
 v8.10    PR#2328   76    折返↩            ✓
+v9.1     PR#2537   79    PASS            ✓  [SWB等价基准规范化]
+v9.2     PR#2579   70    折返↩            ✓  [多模态短片偏离机制回退]
+v9.3     PR#2607   75    折返↩            ✓  [正文压缩与表达锐化]
+v9.5     PR#2722   84    PASS            ✓  [撤Blocker正式通道突破]
+v10      PR#3217   84    PASS            ✓  [四大结构化资产大成收官]
 
-<span class="dim">最高分：84（v8.1 PR#1468）→ 84 高水位保持
+<span class="dim">最高分：84（v8.1 / v9.5 / v10 PR#3217）→ 84 高水位保持
 教训：'加内容' 5 轮无效；克制 + 结构化证据 + 折返复核 = 高分配方。</span></pre>
 <p>每次提交都过"证据核验 → 折返点复核 → K标放行/折返"，账本不可变、Trace 可回放。</p>
 

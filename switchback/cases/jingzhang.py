@@ -37,18 +37,25 @@ from ..trace import Tracer
 # Real, documented submission results (from the project's own recap).
 VERSIONS = [
     # version, pr, score, note, evidence_pass, approved, grade_payload
-    ("v5",  "PR#605",  67, "结构化证据层升级（首获正式评分）", True,  True,  dict(impact=0.8, sensitivity=0.6, reversibility=0.5, trust=0.6)),
-    ("v8",  "PR#1220", 70, "人字形折返治理原创概念确立，表达完整度 2/5", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.4)),
-    ("v8.1","PR#1468", 84, "P0/P1 全量修复：指标重算/双语等价/无证据精度清除/版本统一/权利声明", True, True, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
-    ("v8.2","PR#1816", 70, "叙事深化（人字三义/回授门/四时节律）——加内容路线", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
-    ("v8.5","PR#2205", 77, "执行摘要 + 状态机契约 + 18 条官方一手源", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
-    ("v8.10","PR#2328",76, "结构化资产：risk.json + rights-ledger.json + 元素级 metrics", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
+    ("v5",   "PR#605",  67, "结构化证据层升级（首获正式评分）", True,  True,  dict(impact=0.8, sensitivity=0.6, reversibility=0.5, trust=0.6)),
+    ("v8",   "PR#1220", 70, "人字形折返治理原创概念确立，表达完整度 2/5", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.4)),
+    ("v8.1", "PR#1468", 84, "P0/P1 全量修复：指标重算/双语等价/无证据精度清除/版本统一/权利声明", True, True, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
+    ("v8.2", "PR#1816", 70, "叙事深化（人字三义/回授门/四时节律）——加内容路线", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
+    ("v8.5", "PR#2205", 77, "执行摘要 + 状态机契约 + 18 条官方一手源", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
+    ("v8.10","PR#2328", 76, "结构化资产：risk.json + rights-ledger.json + 元素级 metrics", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.5)),
+    ("v9.1", "PR#2537", 79, "折返等价基准 SWB v0.1 + 8 个拔线测试折返点操作层 + OP-01 配对试点", True, True, dict(impact=0.9, sensitivity=0.8, reversibility=0.3, trust=0.6)),
+    ("v9.2", "PR#2579", 70, "多模态短片脱离数据机制，引入不自洽（触发侧线折返回退）", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.2, trust=0.4)),
+    ("v9.3", "PR#2607", 75, "正文压缩与表达锐化（-13% 冗余剔除，保留全部 78 处机器锚点）", True, False, dict(impact=0.9, sensitivity=0.8, reversibility=0.3, trust=0.5)),
+    ("v9.5", "PR#2722", 84, "撤销 KEY_AREA_PROVISIONAL，官方地块规划文号背书进入正式评分通道", True, True, dict(impact=0.9, sensitivity=0.8, reversibility=0.3, trust=0.7)),
+    ("v10",  "PR#3217", 84, "终极收官：四大结构化证据资产大成 + 双语 100% 实质等价 + 空间零误差对齐", True, True, dict(impact=0.95, sensitivity=0.85, reversibility=0.4, trust=0.8)),
 ]
 
 HIGHLIGHTS = {
     "v5": "67 分：结构化证据层首获评分 — 折返治理验证",
-    "v8.1": "84 分（最高纪录）：P0/P1 全量修复 + 内容克制 — 三方复核放行",
-    "v8.10": "76 分：结构化资产（risk/rights/metrics）小幅有效",
+    "v8.1": "84 分（高水位）：P0/P1 全量修复 + 内容克制 — 三方复核放行",
+    "v9.1": "79 分：SWB 折返等价基准 + 拔线测试操作层 — 实物化演进",
+    "v9.5": "84 分：官方地块文号法定背书，撤销 Blocker 进正式评分通道",
+    "v10": "84+ 分（收官）：四大结构化资产大成 + 双语 0% CJK + 空间指标零误差",
 }
 
 
