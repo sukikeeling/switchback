@@ -1,5 +1,10 @@
 # Switchback · 折返治理
 
+[![Status: Specification & Reference Implementation](https://img.shields.io/badge/Status-Spec%20%26%20Reference%20Impl-blue)](https://github.com/sukikeeling/switchback)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Zero-Dependency](https://img.shields.io/badge/Dependencies-0-success)](https://github.com/sukikeeling/switchback)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > **让每一次 Agent 决策，都沿轨道可查、可停、可回头。**
 > Every agent decision must be traceable, stoppable, and reversible on the rail.
 
