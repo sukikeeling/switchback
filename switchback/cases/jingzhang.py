@@ -152,6 +152,7 @@ def run_jingzhang_case(ws: Path | None = None, headless: bool = False) -> dict:
         "best_score": max(r["score"] for r in results),
         "km_count": len(ledger),
         "chain_integrity": True,
+        "merkle_root": ledger.merkle_root(),
         "lessons": len(memory.export()),
         "risks": len(risk.to_dict()["risks"]),
     }
@@ -178,6 +179,12 @@ def _row(ver: str, pr: str, score: int, verdict: str, evidence: bool) -> dict:
 
 
 def _print_transcript(results: list[dict]) -> None:
+    import sys
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     print("\n== 京张 84 分案例重放（Switchback Governance in action）==\n")
     print(f"{'版本':<6}{'PR':<10}{'分':<5}{'裁决':<14}证据")
     print("-" * 46)

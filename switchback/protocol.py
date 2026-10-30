@@ -72,7 +72,7 @@ class CheckpointKind(str, Enum):
 
 
 # --------------------------------------------------------------------------- #
-# 领域错误
+# 领域错误（含物理级硬熔断 ErrSwitchbackTriggered）
 # --------------------------------------------------------------------------- #
 
 class SwitchbackError(Exception):
@@ -87,8 +87,70 @@ class NoAutoResumeError(SwitchbackError):
     """试图自动恢复 —— 折返治理不设自动恢复，必须显式人工裁决."""
 
 
+class AntiRetryLoopError(NoAutoResumeError):
+    """拒绝无脑重试 —— 严禁模型自作主张编写'道歉反思重试'死循环，必须人类监理介入."""
+
+
+class BudgetExhaustedError(SwitchbackError):
+    """侧线折返探索预算耗尽 —— 自动升级为 DEPOT 入段检修并锁死工作流."""
+
+
 class LedgerIntegrityError(SwitchbackError):
-    """K标账本哈希链校验失败."""
+    """K标账本哈希链或 Merkle 树校验失败."""
+
+
+class ErrSwitchbackTriggered(SwitchbackError):
+    """物理级硬熔断异常（Sidecar 网关在 TCP/HTTP/JSON-RPC 层直接阻断并注入）.
+
+    当检测到 Worker 产生幻觉数值、执行未授权高危操作、泄露凭证、或发生
+    CRLF/package_id/中英标记漂移时，网关抛出此异常并剥夺自动下行权限。
+    """
+
+    JSONRPC_CODE = -32099
+    HTTP_STATUS = 423  # 423 Locked
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        task_id: str = "",
+        violation_kind: str = "governance_violation",
+        target_state: SwitchState = SwitchState.SIDING,
+        km_sealed: Optional[int] = None,
+        details: Optional[dict[str, Any]] = None,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.task_id = task_id
+        self.violation_kind = violation_kind
+        self.target_state = target_state
+        self.km_sealed = km_sealed
+        self.details = details or {}
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "error": "ErrSwitchbackTriggered",
+            "code": self.JSONRPC_CODE,
+            "http_status": self.HTTP_STATUS,
+            "message": self.message,
+            "task_id": self.task_id,
+            "violation_kind": self.violation_kind,
+            "target_state": self.target_state.value,
+            "km_sealed": self.km_sealed,
+            "auto_resume_allowed": False,
+            "details": self.details,
+        }
+
+    def to_jsonrpc_error(self, request_id: Any = None) -> dict[str, Any]:
+        return {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "error": {
+                "code": self.JSONRPC_CODE,
+                "message": f"ErrSwitchbackTriggered: {self.message}",
+                "data": self.to_dict(),
+            },
+        }
 
 
 # --------------------------------------------------------------------------- #
@@ -236,6 +298,10 @@ class TaskCard:
     owner: str = "agent-manager"
     state: SwitchState = SwitchState.DEPOT  # 一律入段开始，经准入后上正线
     created_at: str = field(default_factory=_now)
+    exploration_budget: int = 3             # 侧线折返探索预算（归零则升级入段检修）
+    turn_back_count: int = 0                # 累计折返次数
+    retry_fingerprints: list[str] = field(default_factory=list)  # 防无脑道歉重试指纹
+    human_cosigned: bool = False            # 是否已经过人类与监理双签放行
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -245,4 +311,8 @@ class TaskCard:
             "owner": self.owner,
             "state": self.state.value,
             "created_at": self.created_at,
+            "exploration_budget": self.exploration_budget,
+            "turn_back_count": self.turn_back_count,
+            "retry_fingerprints": list(self.retry_fingerprints),
+            "human_cosigned": self.human_cosigned,
         }

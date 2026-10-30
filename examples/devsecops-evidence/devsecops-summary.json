@@ -1,0 +1,45 @@
+{
+  "case": "devsecops-release",
+  "task": "AI 软件研发与安全发布闭环 (PR#4096)",
+  "stages": [
+    {
+      "stage": "pr-intake",
+      "verdict": "RELEASED",
+      "state": "mainline",
+      "note": "需求准入通过"
+    },
+    {
+      "stage": "db-migration-v1",
+      "verdict": "CIRCUIT_BROKEN",
+      "state": "depot",
+      "note": "物理级熔断 (credential_leak_detected) -> 锁死 DEPOT"
+    },
+    {
+      "stage": "cockpit-dual-sign",
+      "verdict": "DUAL_SIGNED_MAINLINE",
+      "state": "mainline",
+      "retry_blocked": true,
+      "note": "阻断无脑道歉重试 + 人类与监理双签回正线"
+    },
+    {
+      "stage": "benchmark-verify-v1",
+      "verdict": "CIRCUIT_BROKEN",
+      "state": "siding",
+      "note": "三处数值不齐(99.98 vs 94.20) + CRLF/package_id/双语漂移 -> 侧线折返 SIDING"
+    },
+    {
+      "stage": "canary-release-v2",
+      "verdict": "RELEASED",
+      "state": "mainline",
+      "note": "三处数值对齐 + 原子包零漂移 + 三方复核放行 -> MAINLINE"
+    }
+  ],
+  "km_count": 11,
+  "chain_integrity": true,
+  "merkle_root": "ed67dc9bac3cd0a14e7928710208187996dac4c29c06bfd72488f8831eead7f8",
+  "audit_report_sha256": "ff28f2aa112c76f07d6d849e7e5d7911737de5aa90b7d4b8e6880563940bdc7a",
+  "retry_loop_blocked": true,
+  "matrix_room_events": 20,
+  "lessons": 4,
+  "risks": 2
+}

@@ -1,4 +1,4 @@
-# pyproject.toml — Switchback Governance (折返治理)
+# pyproject.toml — Switchback Governance (折返治理 · Industrial Production Guardrail)
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -6,15 +6,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "switchback-governance"
-version = "0.1.0"
-description = "Switchback Governance — the human-in-the-loop governance layer for multi-agent teams. 折返治理：多 Agent 协同的人机监理协议。"
+version = "1.0.0"
+description = "Switchback Governance — Production-Grade Human-in-the-Loop Multi-Agent Guardrail, Live Sidecar Gateway & Merkle Audit Ledger. 折返治理：多 Agent 协同的人机监理治理中枢。"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [{ name = "sukikeeling" }]
-keywords = ["agent", "governance", "human-in-the-loop", "multi-agent", "guardrails", "observability", "audit"]
+keywords = ["agent", "governance", "human-in-the-loop", "multi-agent", "guardrails", "observability", "audit", "mcp", "merkle"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",

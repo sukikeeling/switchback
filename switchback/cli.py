@@ -1,18 +1,23 @@
-"""Switchback CLI — the reproducible entry point.
+"""Switchback CLI — the reproducible entry point for governance, Sidecar, MCP & Cockpit.
 
-The reviewer (or any operator) can drive the whole governance pipeline from the
-terminal without touching Python:
+Drive the entire production governance pipeline from the terminal:
 
-    switchback init            # create a run workspace (policy + ledger + trace)
-    switchback register <task> # admit a task (grade-access skill)
-    switchback verify <task>   # run evidence-verify skill
-    switchback vote <task> ... # three-party votes at the approval checkpoint
-    switchback approve <task>  # resolve checkpoint => pass
-    switchback reject <task>   # resolve checkpoint => turn back (veto)
-    switchback seal <task>     # seal a K-marker
-    switchback status <task>   # task card + switch state + last K-marker
-    switchback ledger          # dump the K-marker chain
-    switchback replay <case>   # replay a built-in case (jingzhang)
+    switchback init                 # create a run workspace (policy + ledger + trace)
+    switchback register <task>      # admit a task (grade-access skill)
+    switchback verify <task>        # run Live Evidence Engine (evidence-verify skill)
+    switchback vote <task> ...      # three-party votes at the approval checkpoint
+    switchback approve <task>       # resolve checkpoint => pass
+    switchback reject <task>        # resolve checkpoint => turn back (veto)
+    switchback intervene <task> ... # Human Governor + G-GOVERNOR dual-sign release
+    switchback rollback <task> ...  # One-click Time Machine rollback to K-marker
+    switchback seal <task>          # seal a K-marker
+    switchback status <task>        # task card + switch state + last K-marker + Merkle Root
+    switchback ledger               # dump the K-marker chain & Merkle Root
+    switchback audit                # generate legal Merkle audit report
+    switchback replay <case>        # replay a built-in case (jingzhang / ops / devsecops)
+    switchback benchmark            # run M5 guardrail benchmark & Skill Portal export
+    switchback mcp-stdio            # run standard MCP JSON-RPC 2.0 server over stdio
+    switchback serve                # start Live Sidecar Gateway & Human Governor WebUI
 """
 
 from __future__ import annotations
@@ -20,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 from .governor import DEFAULT_POLICY, SwitchbackGovernor
@@ -31,16 +37,31 @@ from .trace import Tracer
 WORKSPACE_DIR = Path("switchback-run")
 
 
+def _ensure_utf8_console() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if type(stream).__name__ == "TextIOWrapper" and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+
 def _gov(ws: Path) -> SwitchbackGovernor:
     ledger_path = ws / "kmarker-ledger.json"
+    sqlite_path = ws / "kmarker-ledger.db"
     trace_path = ws / "trace.jsonl"
     tasks_path = ws / "tasks.json"
     policy_path = ws / "governance.json"
     policy = DEFAULT_POLICY
     if policy_path.exists():
-        policy = json.loads(policy_path.read_text(encoding="utf-8"))
+        try:
+            loaded = json.loads(policy_path.read_text(encoding="utf-8"))
+            if loaded and "admission" in loaded:
+                policy = loaded
+        except Exception:
+            pass
     return SwitchbackGovernor(
-        ledger=KMarkerLedger(str(ledger_path)),
+        ledger=KMarkerLedger(str(ledger_path), sqlite_path=str(sqlite_path)),
         tracer=Tracer(str(trace_path)),
         policy=policy,
         tasks_path=str(tasks_path),
@@ -57,7 +78,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     (ws / "governance.json").write_text(
         json.dumps(DEFAULT_POLICY, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    print(f"workspace ready: {ws.resolve()}  (policy + ledger + trace)")
+    print(f"workspace ready: {ws.resolve()}  (policy + ledger + sqlite-wal + trace)")
     return 0
 
 
@@ -95,13 +116,13 @@ def cmd_verify(args: argparse.Namespace) -> int:
 def cmd_vote(args: argparse.Namespace) -> int:
     """Cast a single party vote on the current approval checkpoint."""
     gov = _gov(_workspace())
-    gov.status(args.task)  # 先校验 task 存在，不存在会抛异常
+    gov.status(args.task)
     cp = gov.open_checkpoint(args.task, CheckpointKind.APPROVAL)
     role = PartyRole(args.role)
     verdict = Verdict(args.verdict)
     gov.vote(cp, role, args.name, verdict, note=args.note or "")
     if len(cp.votes) == len(cp.required_roles):
-        v = cp.resolve()
+        v = cp.decided if cp.is_decided else cp.resolve()
         print(f"checkpoint {cp.id}: {v.value}")
         if v == Verdict.TURN_BACK:
             gov.turn_back(args.task, actor="governor", reason=f"{role.value} veto")
@@ -120,7 +141,7 @@ def cmd_seal(args: argparse.Namespace) -> int:
     gov.status(args.task)
     payload = json.loads(args.payload) if args.payload else {}
     marker = gov.seal(args.task, args.label, payload)
-    print(f"sealed: K{marker.km} {args.label} | sha256={marker.sha256[:16]}…")
+    print(f"sealed: K{marker.km} {args.label} | sha256={marker.sha256[:16]}… | merkle={gov.ledger.merkle_root()[:16]}…")
     return 0
 
 
@@ -129,10 +150,9 @@ def cmd_approve(args: argparse.Namespace) -> int:
     card = gov.status(args.task)["task"]
     grade = Grade(card["grade"])
     cp = gov.open_checkpoint(args.task, CheckpointKind.APPROVAL)
-    for role, name in zip([PartyRole.OWNER, PartyRole.PROFESSIONAL, PartyRole.PUBLIC],
-                          ["owner", "professional", "public"]):
-        gov.vote(cp, role, name, Verdict.PASS)
-    verdict = cp.resolve()
+    for role in gov.required_roles(grade):
+        gov.vote(cp, role, role.value, Verdict.PASS)
+    verdict = cp.decided if cp.is_decided else cp.resolve()
     print(f"approval checkpoint {cp.id}: {verdict.value}")
     if verdict == Verdict.PASS:
         gov.switch(args.task, SwitchState.MAINLINE, actor="approver", reason="three-party approval passed")
@@ -146,12 +166,39 @@ def cmd_reject(args: argparse.Namespace) -> int:
     card = gov.status(args.task)["task"]
     grade = Grade(card["grade"])
     cp = gov.open_checkpoint(args.task, CheckpointKind.APPROVAL)
-    gov.vote(cp, PartyRole.PUBLIC, "public", Verdict.TURN_BACK, note=args.reason or "veto")
-    gov.vote(cp, PartyRole.PROFESSIONAL, "professional", Verdict.PASS)
-    gov.vote(cp, PartyRole.OWNER, "owner", Verdict.PASS)
-    verdict = cp.resolve()
+    req_roles = gov.required_roles(grade)
+    for idx, role in enumerate(req_roles):
+        v = Verdict.TURN_BACK if idx == 0 else Verdict.PASS
+        gov.vote(cp, role, role.value, v, note=args.reason or "veto")
+    verdict = cp.decided if cp.is_decided else cp.resolve()
     gov.turn_back(args.task, actor="governor", reason=args.reason or "public veto")
     print(f"approval checkpoint {cp.id}: {verdict.value} => task {args.task} -> SIDING (no auto-resume)")
+    return 0
+
+
+def cmd_intervene(args: argparse.Namespace) -> int:
+    gov = _gov(_workspace())
+    patched = json.loads(args.patch) if args.patch else {}
+    res = gov.human_intervene(
+        task_id=args.task,
+        human_actor=args.human,
+        governor_actor=args.governor,
+        patched_payload=patched,
+        reason=args.reason,
+    )
+    print(json.dumps(res, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_rollback(args: argparse.Namespace) -> int:
+    gov = _gov(_workspace())
+    res = gov.rollback_to_km(
+        task_id=args.task,
+        target_km=args.km,
+        actor=args.actor,
+        reason=args.reason,
+    )
+    print(json.dumps(res, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -163,10 +210,19 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_ledger(args: argparse.Namespace) -> int:
-    ledger = KMarkerLedger(str(_workspace() / "kmarker-ledger.json"))
+    ws = _workspace()
+    ledger = KMarkerLedger(str(ws / "kmarker-ledger.json"), sqlite_path=str(ws / "kmarker-ledger.db"))
     ok = ledger.verify_chain()
     print(ledger.export("md"))
-    print(f"chain integrity: {'OK' if ok else 'BROKEN'}")
+    print(f"chain integrity: {'OK' if ok else 'BROKEN'} | merkle_root: {ledger.merkle_root()[:16]}…")
+    return 0
+
+
+def cmd_audit(args: argparse.Namespace) -> int:
+    ws = _workspace()
+    ledger = KMarkerLedger(str(ws / "kmarker-ledger.json"), sqlite_path=str(ws / "kmarker-ledger.db"))
+    report = ledger.generate_audit_report(task_id=args.task)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -183,11 +239,45 @@ def cmd_replay(args: argparse.Namespace) -> int:
         from .cases.ops import run_ops_case
         run_ops_case(ws=_workspace(), headless=False)
         return 0
+    if args.case == "devsecops":
+        from .cases.devsecops import run_devsecops_case
+        run_devsecops_case(ws=_workspace(), headless=False)
+        return 0
     print(f"unknown case: {args.case}", file=sys.stderr)
     return 2
 
 
+def cmd_benchmark(args: argparse.Namespace) -> int:
+    from .benchmark import run_benchmark_suite
+    run_benchmark_suite(ws=_workspace(), headless=False)
+    return 0
+
+
+def cmd_mcp_stdio(args: argparse.Namespace) -> int:
+    from .mcp_server import SwitchbackMCPServer
+    srv = SwitchbackMCPServer(governor=_gov(_workspace()))
+    return srv.serve_stdio()
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    from .sidecar import SidecarHTTPServer, SwitchbackSidecarGateway
+    gw = SwitchbackSidecarGateway(governor=_gov(_workspace()))
+    srv = SidecarHTTPServer(gateway=gw, host=args.host, port=args.port)
+    url = srv.start_background()
+    print(f"Switchback Live Sidecar & Human Governor Cockpit listening on {url}")
+    if args.once:
+        srv.stop()
+        return 0
+    try:
+        while True:
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        srv.stop()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    _ensure_utf8_console()
     p = argparse.ArgumentParser(prog="switchback", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -220,6 +310,19 @@ def main(argv: list[str] | None = None) -> int:
     vote.add_argument("--verdict", choices=["pass", "turn_back", "depot"], required=True)
     vote.add_argument("--note", default="")
 
+    iv = sub.add_parser("intervene", help="Human Governor + G-GOVERNOR dual-sign release from DEPOT")
+    iv.add_argument("task")
+    iv.add_argument("--human", default="human-governor")
+    iv.add_argument("--governor", default="G-GOVERNOR")
+    iv.add_argument("--patch", default="{}")
+    iv.add_argument("--reason", default="human cockpit dual-sign release")
+
+    rb = sub.add_parser("rollback", help="Time Machine rollback to a verified K-marker")
+    rb.add_argument("task")
+    rb.add_argument("--km", type=int, required=True)
+    rb.add_argument("--actor", default="human-governor")
+    rb.add_argument("--reason", default="time-machine rollback")
+
     seal = sub.add_parser("seal", help="seal a K-marker into the ledger")
     seal.add_argument("task")
     seal.add_argument("--label", default="release")
@@ -228,18 +331,43 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("status", help="show task card")
     s.add_argument("task")
 
-    l = sub.add_parser("ledger", help="dump K-marker chain")
+    sub.add_parser("ledger", help="dump K-marker chain & Merkle Root")
+
+    aud = sub.add_parser("audit", help="generate Merkle-verified machine behavior audit report")
+    aud.add_argument("--task", default=None)
 
     rep = sub.add_parser("replay", help="replay a built-in case")
-    rep.add_argument("case", choices=["jingzhang", "ops"])
+    rep.add_argument("case", choices=["jingzhang", "ops", "devsecops"])
     rep.add_argument("--live", action="store_true",
                      help="jingzhang: verify PRs exist via GitHub API (real, not scripted)")
 
+    sub.add_parser("benchmark", help="run M5 guardrail benchmark & export Skill Portal manifest")
+    sub.add_parser("mcp-stdio", help="run standard MCP JSON-RPC 2.0 server over stdin/stdout")
+
+    srv = sub.add_parser("serve", help="start Live Sidecar Gateway & Human Governor WebUI")
+    srv.add_argument("--host", default="127.0.0.1")
+    srv.add_argument("--port", type=int, default=8780)
+    srv.add_argument("--once", action="store_true", help="start and immediately stop (for self-test)")
+
     args = p.parse_args(argv)
-    return {"init": cmd_init, "register": cmd_register, "verify": cmd_verify,
-            "vote": cmd_vote, "approve": cmd_approve, "reject": cmd_reject,
-            "seal": cmd_seal, "status": cmd_status,
-            "ledger": cmd_ledger, "replay": cmd_replay}[args.cmd](args)
+    return {
+        "init": cmd_init,
+        "register": cmd_register,
+        "verify": cmd_verify,
+        "vote": cmd_vote,
+        "approve": cmd_approve,
+        "reject": cmd_reject,
+        "intervene": cmd_intervene,
+        "rollback": cmd_rollback,
+        "seal": cmd_seal,
+        "status": cmd_status,
+        "ledger": cmd_ledger,
+        "audit": cmd_audit,
+        "replay": cmd_replay,
+        "benchmark": cmd_benchmark,
+        "mcp-stdio": cmd_mcp_stdio,
+        "serve": cmd_serve,
+    }[args.cmd](args)
 
 
 if __name__ == "__main__":

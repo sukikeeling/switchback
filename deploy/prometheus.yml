@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "switchback-sidecar"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["switchback-sidecar:8780", "localhost:8780"]
+        labels:
+          layer: "governance-sidecar"
+          railway_line: "jingzhang-qinglongqiao"

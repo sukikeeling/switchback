@@ -1,0 +1,247 @@
+{
+  "schema": "switchback.kmarker-ledger/v1",
+  "merkle_root": "ed67dc9bac3cd0a14e7928710208187996dac4c29c06bfd72488f8831eead7f8",
+  "entries": [
+    {
+      "km": 0,
+      "id": "9942d4da4115",
+      "task_id": "devsecops-pr-intake",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "title": "PR#4096 结算核心库热补丁立项与需求拆解"
+      },
+      "prev_sha": "",
+      "sha256": "72dfcbd39aa3d3836130b74bf9885535136adad1c049bb19c24ec8d26b0c6d99",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 1,
+      "id": "21482d00de1a",
+      "task_id": "devsecops-pr-intake",
+      "label": "K-pass:artifact.verify_and_deliver",
+      "payload": {
+        "actor": "W-VERIFY",
+        "tool": "artifact.verify_and_deliver",
+        "status": "ok"
+      },
+      "prev_sha": "72dfcbd39aa3d3836130b74bf9885535136adad1c049bb19c24ec8d26b0c6d99",
+      "sha256": "1d71030804c12a1178ce17770c33b27cef279c9723287025d5f2708260cabfae",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 2,
+      "id": "371591dda3fd",
+      "task_id": "devsecops-pr-intake",
+      "label": "K-release",
+      "payload": {
+        "verdict": "pass",
+        "room_id": "!devsecops-release:switchback.local"
+      },
+      "prev_sha": "1d71030804c12a1178ce17770c33b27cef279c9723287025d5f2708260cabfae",
+      "sha256": "abefe6c8c5c4525b21ece4219eee42793ea395c779047c1e99f4e53796a5336f",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 3,
+      "id": "eba23010b7cc",
+      "task_id": "devsecops-migration",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "title": "数据库 Schema 变更执行"
+      },
+      "prev_sha": "abefe6c8c5c4525b21ece4219eee42793ea395c779047c1e99f4e53796a5336f",
+      "sha256": "da85997c3195cc9fa5402ce34d5629b53db7d90ee400367b481f58c189c4edad",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 4,
+      "id": "abe694a46933",
+      "task_id": "devsecops-migration",
+      "label": "K-circuit-break:credential_leak_detected",
+      "payload": {
+        "actor": "W-VERIFY",
+        "violation_kind": "credential_leak_detected",
+        "target_state": "depot",
+        "message": "Credential leak intercepted in payload (ghp_ABCDEFGH***); pulled into DEPOT.",
+        "details": {
+          "actor": "W-VERIFY",
+          "tool": "artifact.verify_and_deliver"
+        }
+      },
+      "prev_sha": "da85997c3195cc9fa5402ce34d5629b53db7d90ee400367b481f58c189c4edad",
+      "sha256": "fe19d15f9de2d9658519f44962c10bb10c014294bc3ff623711c1c0b20b0f332",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 5,
+      "id": "b64dde78471a",
+      "task_id": "devsecops-migration",
+      "label": "K-human-dual-sign",
+      "payload": {
+        "human_actor": "sukikeeling",
+        "governor_actor": "G-GOVERNOR",
+        "reason": "剔除 DROP COLUMN 与硬编码 Token，改为 Expand-Contract 安全迁移并双签放行",
+        "patched_payload": {
+          "sql": "ALTER TABLE ledger ADD COLUMN balance_v2 NUMERIC;",
+          "migration_mode": "expand_contract"
+        },
+        "checkpoint_id": "bd99d759b18d"
+      },
+      "prev_sha": "fe19d15f9de2d9658519f44962c10bb10c014294bc3ff623711c1c0b20b0f332",
+      "sha256": "3634e7ebcd6b55a5cf86fb2d81ef7cb41361ffa6403db40d7429d74ecf80ca1e",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 6,
+      "id": "95560a35fc71",
+      "task_id": "devsecops-canary-v1",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "steep",
+        "title": "压测报告与金丝雀校验 v1"
+      },
+      "prev_sha": "3634e7ebcd6b55a5cf86fb2d81ef7cb41361ffa6403db40d7429d74ecf80ca1e",
+      "sha256": "733c1d20499b049631bcd91a3305b9dd799392976d67e0cbda22a889a74d0a29",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 7,
+      "id": "85b8806a89d6",
+      "task_id": "devsecops-canary-v1",
+      "label": "K-circuit-break:evidence_drift:numeric_three_way_live,crlf_hash_alignment,package_id_consistency,bilingual_marker_alignment",
+      "payload": {
+        "actor": "W-VERIFY",
+        "violation_kind": "evidence_drift:numeric_three_way_live,crlf_hash_alignment,package_id_consistency,bilingual_marker_alignment",
+        "target_state": "siding",
+        "message": "Live Evidence Engine rejected payload: failed checks ['numeric_three_way_live', 'crlf_hash_alignment', 'package_id_consistency', 'bilingual_marker_alignment']",
+        "details": {
+          "verification_report": {
+            "passed": false,
+            "checks": [
+              {
+                "check": "numeric_three_way_live",
+                "key": "availability",
+                "ok": false,
+                "sources": {
+                  "prose": 99.98,
+                  "table": 99.98,
+                  "api": 94.2
+                },
+                "values": [
+                  99.98,
+                  99.98,
+                  94.2
+                ]
+              },
+              {
+                "check": "reference_forward",
+                "ok": true,
+                "missing": []
+              },
+              {
+                "check": "reference_backward",
+                "ok": true,
+                "uncited": []
+              },
+              {
+                "check": "content_hash",
+                "ok": true,
+                "digest": "905b452ba0256fc8"
+              },
+              {
+                "check": "crlf_hash_alignment",
+                "ok": false,
+                "crlf_files": [
+                  "report_zh.md"
+                ],
+                "file_hashes": {
+                  "report_zh.md": {
+                    "raw_sha256": "516a6d6a5e0cb51df273ca18cfeaed135e30a851d6d15bf7cbd4747c6d8b74fc",
+                    "lf_sha256": "5c07b1dc9caeb7ecddb58a8171160ae6fd9aa0f29526ce6faf754b899f8e8173"
+                  },
+                  "report_en.md": {
+                    "raw_sha256": "9d008d71d1b559cbb715494a5666ae740af05d7376e2d5598c1894740a7641a0",
+                    "lf_sha256": "9d008d71d1b559cbb715494a5666ae740af05d7376e2d5598c1894740a7641a0"
+                  }
+                }
+              },
+              {
+                "check": "package_id_consistency",
+                "ok": false,
+                "unique_package_ids": [
+                  "pkg-v0.9",
+                  "pkg-v1.0"
+                ],
+                "unique_versions": [],
+                "by_file": {
+                  "package_ids": {
+                    "report_zh.md": [
+                      "pkg-v1.0"
+                    ],
+                    "report_en.md": [
+                      "pkg-v0.9"
+                    ]
+                  },
+                  "versions": {}
+                }
+              },
+              {
+                "check": "bilingual_marker_alignment",
+                "ok": false,
+                "drift_count": 1,
+                "missing_anchors_in_en": [],
+                "extra_anchors_in_en": [],
+                "cjk_residue_in_en_count": 1
+              }
+            ]
+          }
+        }
+      },
+      "prev_sha": "733c1d20499b049631bcd91a3305b9dd799392976d67e0cbda22a889a74d0a29",
+      "sha256": "238f1b89ec44ef51c3c69100d4c8d96ea54c061b96e50e87e3e965a7c80fc678",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 8,
+      "id": "f039172c43a6",
+      "task_id": "devsecops-canary-v2",
+      "label": "K0 admission",
+      "payload": {
+        "grade": "medium",
+        "title": "压测报告与金丝雀正式发布 v2"
+      },
+      "prev_sha": "238f1b89ec44ef51c3c69100d4c8d96ea54c061b96e50e87e3e965a7c80fc678",
+      "sha256": "074764043ab43bb3a13a62f4e2c54c7593511388dff0a9f8bd89c8092a061e2c",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 9,
+      "id": "080b96dc239e",
+      "task_id": "devsecops-canary-v2",
+      "label": "K-pass:artifact.verify_and_deliver",
+      "payload": {
+        "actor": "W-VERIFY",
+        "tool": "artifact.verify_and_deliver",
+        "status": "ok"
+      },
+      "prev_sha": "074764043ab43bb3a13a62f4e2c54c7593511388dff0a9f8bd89c8092a061e2c",
+      "sha256": "42ebde0e9e45ddd9647ff9a5cbd85e0164b5bd7ca42c3c934ffd768d6411d826",
+      "timestamp": "2026-10-30T08:57:33Z"
+    },
+    {
+      "km": 10,
+      "id": "7ab63b90ee21",
+      "task_id": "devsecops-canary-v2",
+      "label": "K-release",
+      "payload": {
+        "verdict": "pass",
+        "room_id": "!devsecops-release:switchback.local"
+      },
+      "prev_sha": "42ebde0e9e45ddd9647ff9a5cbd85e0164b5bd7ca42c3c934ffd768d6411d826",
+      "sha256": "c924c38b7c6d0f77fee00a59fcec02cacc56c790c15121b57135624b526c54cc",
+      "timestamp": "2026-10-30T08:57:33Z"
+    }
+  ]
+}

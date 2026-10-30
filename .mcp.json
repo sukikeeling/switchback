@@ -1,5 +1,17 @@
 {
   "mcpServers": {
+    "switchback-governance": {
+      "command": "python",
+      "args": [
+        "-m",
+        "switchback.cli",
+        "mcp-stdio"
+      ],
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "note": "Switchback 原生标准 MCP JSON-RPC 2.0 Server：直接暴露六大核心治理 Skill 与 Merkle 审计/时光机回溯工具"
+    },
     "filesystem": {
       "command": "npx",
       "args": [
@@ -33,24 +45,42 @@
     }
   },
   "switchback_skills_via_mcp": {
-    "note": "六大 Skill 的迁移契约：当前为本地 Python 函数，迁 MCP 时只需协议适配（JSON 契约不变），不重设计工具调用链",
+    "note": "六大 Skill 已全部在 switchback/mcp_server.py 中实现为标准可执行 MCP Server Tool（同时支持 stdio 与 HTTP /v1/mcp/rpc）",
     "evidence-verify": {
-      "transport": "stdio",
-      "input_schema": "claims(dict) + sources(dict) + numeric_keys(list)",
+      "transport": "stdio+http",
+      "input_schema": "claims(dict) + sources(dict) + numeric_keys(list) + prose_text + table_data + api_payload + artifact_bundle",
       "output_schema": "VerificationReport{passed(bool), checks(list)}",
-      "migration": "包成 MCP server tool，签名不变"
+      "status": "implemented"
     },
     "grade-access": {
-      "transport": "stdio",
-      "input_schema": "task_payload(dict) + trust_score(float)",
+      "transport": "stdio+http",
+      "input_schema": "payload(dict) + trust_score(float)",
       "output_schema": "Grade(enum: gentle/medium/steep)",
-      "migration": "同上"
+      "status": "implemented"
     },
     "kmarker-ledger": {
-      "transport": "stdio",
+      "transport": "stdio+http",
       "input_schema": "task_id + label + payload(dict)",
-      "output_schema": "KMarker{km, sha256, prev_sha}",
-      "migration": "账本状态存于文件系统 MCP，seal 操作包成 MCP tool"
+      "output_schema": "KMarker{km, sha256, prev_sha} + merkle_root",
+      "status": "implemented"
+    },
+    "risk-ledger": {
+      "transport": "stdio+http",
+      "input_schema": "risk_id + title + score + note + mitigation + human_review",
+      "output_schema": "RiskEntry{id, score, flag}",
+      "status": "implemented"
+    },
+    "switch-decision": {
+      "transport": "stdio+http",
+      "input_schema": "task_id + votes(list)",
+      "output_schema": "Verdict{pass|turn_back|depot} + task_state",
+      "status": "implemented"
+    },
+    "lessons-learned": {
+      "transport": "stdio+http",
+      "input_schema": "agent_id + content + tags(list)",
+      "output_schema": "MemoryEntry",
+      "status": "implemented"
     }
   }
 }

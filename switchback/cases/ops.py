@@ -141,6 +141,7 @@ def run_ops_case(ws: Path | None = None, headless: bool = False) -> dict:
         "turned_back": sum(1 for r in results if r["verdict"] == "TURNED_BACK"),
         "km_count": len(ledger),
         "chain_integrity": True,
+        "merkle_root": ledger.merkle_root(),
         "lessons": len(memory.export()),
         "risks": len(risk.to_dict()["risks"]),
     }
@@ -167,6 +168,12 @@ def _row(task: str, verdict: str, grade: str, evidence: bool) -> dict:
 
 
 def _print_transcript(results: list[dict]) -> None:
+    import sys
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     print("\n== 运维事故自主闭环（Switchback Governance · 跨行业复用）==")
     print("  事故 INC-2026-0813：支付服务 5xx 飙升\n")
     print(f"{'阶段':<18}{'裁决':<14}{'坡度':<8}证据")

@@ -1,0 +1,35 @@
+# Higress AI Gateway Configuration for Switchback Live Sidecar
+# Enforces Consumer Token Credential Passthrough + Inline Governance Interception
+apiVersion: networking.higress.io/v1
+kind: McpBridge
+metadata:
+  name: switchback-governance-bridge
+spec:
+  registries:
+    - name: switchback-sidecar
+      type: static
+      domain: switchback-sidecar:8780
+  consumers:
+    - name: M-OPER
+      token: ctok_m_oper
+      upstreamCredentialEnv: HIGRESS_UPSTREAM_LLM_KEY
+    - name: W-RESEARCH
+      token: ctok_w_research
+      upstreamCredentialEnv: GITHUB_PERSONAL_ACCESS_TOKEN
+    - name: W-CREATE
+      token: ctok_w_create
+      upstreamCredentialEnv: HIGRESS_UPSTREAM_LLM_KEY
+    - name: W-VERIFY
+      token: ctok_w_verify
+      upstreamCredentialEnv: HIGRESS_UPSTREAM_VERIFY_KEY
+    - name: W-RISK
+      token: ctok_w_risk
+      upstreamCredentialEnv: HIGRESS_UPSTREAM_AUDIT_KEY
+    - name: G-GOVERNOR
+      token: ctok_g_governor
+      upstreamCredentialEnv: HIGRESS_GOVERNOR_MASTER_KEY
+  filters:
+    - name: switchback-ext-authz
+      endpoint: http://switchback-sidecar:8780/v1/govern/intercept
+      failOpen: false  # 铁律：物理级硬熔断，严禁 fail-open 自动放行
+      abortHttpStatus: 423

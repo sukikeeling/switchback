@@ -1,0 +1,58 @@
+{
+  "title": "Switchback · 京张人字形轨道拓扑与道岔治理大屏",
+  "uid": "switchback-rail-topology",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "tags": ["switchback", "agent-governance", "otel", "merkle"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "道岔三态实时分布 (MAINLINE / SIDING / DEPOT)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "switchback_state_transitions_total",
+          "legendFormat": "{{state}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "Sidecar 物理级硬熔断总次数 (ErrSwitchbackTriggered)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "switchback_circuit_breaks_total",
+          "legendFormat": "Circuit Breaks"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0}
+    },
+    {
+      "id": 3,
+      "title": "K标 Merkle 证据树高度与存证数",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "switchback_kmarkers_sealed_total",
+          "legendFormat": "Sealed K-Markers"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0}
+    },
+    {
+      "id": 4,
+      "title": "全链路治理事件流 (OTel / Prometheus Rate)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(switchback_events_total[1m])",
+          "legendFormat": "{{event}}"
+        }
+      ],
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8}
+    }
+  ]
+}

@@ -10,8 +10,9 @@ in the competition docs is not a slide claim but runnable code.
 Skills:
   S1 grade-access     坡度准入 —— assigns a Grade to an incoming task.
   S2 evidence-verify  证据核验 —— numeric three-way alignment + reference
-                      cross-check + content hash (the "verifier agent").
-  S3 kmarker-ledger   K标账本 —— seals an immutable K-marker entry.
+                      cross-check + content hash + live source probe + atomic
+                      package drift verification (CRLF / package_id / bilingual).
+  S3 kmarker-ledger   K标账本 —— seals an immutable K-marker entry with Merkle proof.
   S4 risk-ledger      风险台账 —— records a risk with mitigation + human review.
   S5 switch-decision  折返裁决 —— resolves a three-party checkpoint.
   S6 lessons-learned  经验沉淀 —— writes a lesson back into agent memory.
@@ -23,11 +24,12 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from .ledger import KMarkerLedger, RiskLedger
 from .protocol import Checkpoint, Grade, PartyRole, Verdict
 from .state import AgentMemory
+from .verifier import LiveEvidenceEngine
 
 
 # --------------------------------------------------------------------------- #
@@ -75,10 +77,18 @@ def grade_access(payload: dict[str, Any], trust_score: float = 0.5) -> Grade:
     """Assign a grade from a task's risk surface.
 
     Scoring: higher impact + lower trust => steeper grade.
+    Also detects high-risk action keywords (delete, drop, secret, transfer, release)
+    and forces STEEP grade.
     """
-    impact = float(payload.get("impact", 0.5))
-    sensitivity = float(payload.get("sensitivity", 0.0))
-    reversibility = float(payload.get("reversibility", 1.0))  # 1 = fully reversible
+    action_text = json.dumps(payload, ensure_ascii=False).lower()
+    if any(kw in action_text for kw in ("drop column", "drop table", "rm -rf", "transfer_funds", "secret_key", "private_key")):
+        return Grade.STEEP
+    try:
+        impact = float(payload.get("impact", 0.5))
+        sensitivity = float(payload.get("sensitivity", 0.0))
+        reversibility = float(payload.get("reversibility", 1.0))  # 1 = fully reversible
+    except (TypeError, ValueError):
+        return Grade.STEEP
     risk = (0.4 * impact + 0.4 * sensitivity + 0.2 * (1 - reversibility)) * (2 - trust_score)
     if risk >= 1.2:
         return Grade.STEEP
@@ -101,7 +111,7 @@ GRADE_ACCESS_SPEC = _spec(
 
 
 # --------------------------------------------------------------------------- #
-# S2 证据核验
+# S2 证据核验（融合 LiveEvidenceEngine 动态事实对齐矩阵）
 # --------------------------------------------------------------------------- #
 
 class VerificationReport:
@@ -119,33 +129,55 @@ def evidence_verify(
     claims: dict[str, Any],
     sources: dict[str, Any],
     numeric_keys: Optional[list[str]] = None,
+    *,
+    prose_text: Optional[str] = None,
+    table_data: Any = None,
+    api_payload: Optional[dict[str, Any]] = None,
+    artifact_bundle: Optional[dict[str, str | bytes]] = None,
+    bilingual_pair: Optional[tuple[str, str]] = None,
+    probe_live_sources: bool = False,
 ) -> VerificationReport:
-    """Three checks the Jingzhang project learned the hard way:
+    """Live Evidence Verification Engine:
 
-      1. 数值三处对齐  — every numeric claim must appear identically in >=3 places;
-      2. 引用双向检查  — every claim cites a source that exists, every source is cited;
-      3. 内容寻址哈希  — every artifact payload has a stable content digest.
+      1. 数值三处对齐  — supports both `key / key_alt1 / key_alt2` AND live extraction
+                        across `prose_text` + `table_data` + `api_payload`;
+      2. 引用双向检查  — every claim cites a source that exists, every source is cited,
+                        plus optional live snapshot probing & SHA-256 hash lock;
+      3. 内容寻址哈希  — every artifact payload has a stable content digest;
+      4. 原子包防漂移  — optional CRLF / package_id / bilingual marker alignment check.
 
     Anything that fails marks the artifact FIXED/REWORK and forces a turn-back.
     """
     checks: list[dict[str, Any]] = []
     numeric_keys = numeric_keys or []
 
-    # 1) numeric three-way alignment
-    for key in numeric_keys:
-        places = [
-            claims.get(key),
-            claims.get(f"{key}_alt1"),
-            claims.get(f"{key}_alt2"),
-        ]
-        present = [p for p in places if p is not None]
-        ok = len(present) >= 3 and len(set(present)) == 1
-        checks.append({"check": "numeric_three_way", "key": key, "ok": ok,
-                       "values": present})
+    # 1) numeric three-way alignment (live prose/table/api OR classic claims dict)
+    if prose_text is not None and table_data is not None and api_payload is not None:
+        checks.extend(
+            LiveEvidenceEngine.verify_three_way_live(
+                prose=prose_text,
+                table=table_data,
+                api_payload=api_payload,
+                numeric_keys=numeric_keys,
+            )
+        )
+    else:
+        for key in numeric_keys:
+            places = [
+                claims.get(key),
+                claims.get(f"{key}_alt1"),
+                claims.get(f"{key}_alt2"),
+            ]
+            present = [p for p in places if p is not None]
+            ok = len(present) >= 3 and len(set(present)) == 1
+            checks.append({"check": "numeric_three_way", "key": key, "ok": ok,
+                           "values": present})
 
     # 2) bidirectional reference check
     cited = {k for v in claims.values() if isinstance(v, str)
-             for k in re.findall(r"source:([A-Z0-9-]+)", v)}
+             for k in re.findall(r"source:([A-Z0-9_-]+)", v)}
+    if prose_text:
+        cited |= set(re.findall(r"source:([A-Z0-9_-]+)", prose_text))
     missing_sources = sorted(cited - set(sources))
     uncited_sources = sorted(set(sources) - cited)
     checks.append({"check": "reference_forward", "ok": not missing_sources,
@@ -153,9 +185,20 @@ def evidence_verify(
     checks.append({"check": "reference_backward", "ok": not uncited_sources,
                    "uncited": uncited_sources})
 
+    # 2b) live source snapshot & hash lock check (when requested or when sources contain dict specs)
+    if probe_live_sources or any(isinstance(v, dict) for v in sources.values()):
+        snapshots = []
+        for sid, sspec in sources.items():
+            snap = LiveEvidenceEngine.probe_source(sid, sspec)
+            snapshots.append(snap.to_dict())
+        all_snaps_ok = all(s["ok"] for s in snapshots)
+        checks.append({
+            "check": "source_snapshot_lock",
+            "ok": all_snaps_ok,
+            "snapshots": snapshots,
+        })
+
     # 3) content-addressable digest
-    #    The digest is computed over the artifact WITHOUT the self-hash field,
-    #    so "did the artifact change since it was sealed?" is answerable.
     body = {k: v for k, v in claims.items() if k != "content_sha256"}
     digest = hashlib.sha256(
         json.dumps(body, sort_keys=True, ensure_ascii=False).encode("utf-8")
@@ -164,17 +207,27 @@ def evidence_verify(
     checks.append({"check": "content_hash", "ok": claimed_digest is None or claimed_digest == digest,
                    "digest": digest[:16]})
 
+    # 4) atomic multi-file package check (CRLF / package_id / bilingual markers)
+    if artifact_bundle is not None:
+        pkg_res = LiveEvidenceEngine.verify_atomic_package(
+            artifact_bundle,
+            expected_package_id=claims.get("package_id"),
+            expected_version=claims.get("version"),
+            bilingual_pair=bilingual_pair,
+        )
+        checks.extend(pkg_res["checks"])
+
     passed = all(c["ok"] for c in checks)
     return VerificationReport(checks, passed)
 
 
 EVIDENCE_VERIFY_SPEC = _spec(
     "evidence-verify",
-    "证据核验：数值三处对齐 + 引用双向检查 + 内容寻址哈希。",
-    "claims dict + sources dict + numeric_keys",
+    "证据核验：数值三处对齐 + 引用双向检查 + 内容寻址哈希 + 活体信源快照与原子包漂移核验。",
+    "claims dict + sources dict + numeric_keys (+ 可选 prose/table/api/artifact_bundle)",
     "VerificationReport（passed + 逐项检查）",
-    "产出物进入 post_verify 折返点之前",
-    "hashlib / re（内置）",
+    "产出物进入 post_verify 折返点之前或 Sidecar 实时拦截时",
+    "hashlib / re / urllib（内置）",
     "任一检查失败 => passed=False，强制标记 REWORK 并折返",
     "只读校验，不改动工件；不通过不进入审批",
     "所有'Agent 输出不可信'问题的第一道闸门，跨行业复用",
@@ -194,13 +247,13 @@ def kmarker_seal(ledger: KMarkerLedger, task_id: str, label: str, payload: dict[
 
 KMARKER_LEDGER_SPEC = _spec(
     "kmarker-ledger",
-    "K标账本：每次数据更新/复算/放行记入不可变哈希链 K 标。",
+    "K标账本：每次数据更新/复算/放行记入不可变哈希链与 Merkle 树 K 标。",
     "task_id + label + payload",
-    "KMarker（km/sha256/prev_sha）",
+    "KMarker（km/sha256/prev_sha）+ Merkle Root",
     "任何数据更新、复算、放行时刻",
-    "KMarkerLedger（哈希链）",
+    "KMarkerLedger（哈希链 + Merkle Tree + SQLite WAL）",
     "链校验失败 => LedgerIntegrityError，拒绝写入",
-    "只追加不覆盖；审计方持链可全量复核",
+    "只追加不覆盖；审计方持链与 Merkle Proof 可全量复核",
     "金融/合规/政务等一切需要审计留痕的场景",
 )
 
